@@ -1,0 +1,6 @@
+{
+  "name": "GS Calendar",
+  "description": "GS Calendar 2027 (Kaldarshak Panchang) featuring all 12 months of 2027, Vikram Samvat, Hijri calendar, Hindu/Muslim/Sikh/Christian/Jain festivals, government holidays, daily Panchang, Jyotish Muhurat, and monthly Rashifal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

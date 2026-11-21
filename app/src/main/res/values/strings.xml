@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">GS Calendar</string>
+    <string name="brand_title">GS Calendar 2027</string>
+    <string name="brand_subtitle">जी.एस. कैलेंडर २०२७ — सम्पूर्ण भारत का विश्वसनीय कालदर्शक</string>
+    <string name="brand_tagline">शुद्ध वैदिक एवं सर्वधर्म कालदर्शक पंचांग</string>
+    <string name="mantra_left">॥ श्री गणेशाय नमः ॥</string>
+    <string name="nav_calendar">कैलेंडर</string>
+    <string name="nav_panchang">ज्योतिष व मुहूर्त</string>
+    <string name="nav_rashifal">राशिफल</string>
+    <string name="nav_festivals">सभी पर्व</string>
+    <string name="filter_all">सभी पर्व</string>
+    <string name="filter_hindu">हिन्दू</string>
+    <string name="filter_muslim">मुस्लिम</string>
+    <string name="filter_other">सिख/ईसाई/जैन</string>
+    <string name="filter_govt">राजकीय अवकाश</string>
+    <string name="govt_holiday_badge">अवकाश</string>
+    <string name="govt_holiday_full">राजकीय अवकाश</string>
+    <string name="close_label">बंद करें (Close)</string>
+    <string name="disclaimer_note">नोट: स्थानीय सूर्योदय एवं चन्द्र दर्शन के अनुसार तिथि व मुस्लिम पर्वों में १ दिन का अंतर संभव है।</string>
+</resources>

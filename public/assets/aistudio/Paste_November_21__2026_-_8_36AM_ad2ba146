@@ -1,0 +1,1630 @@
+```html
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GS Calendar 2027 - जी.एस. कैलेंडर २०२७ (कालदर्शक पंचांग)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;600;700;900&family=Poppins:wght@400;500;600;700;800&family=Rozha+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper-bg: #FCF8EE;
+            --paper-border: #8B1E1E;
+            --crimson: #B91C1C;
+            --saffron: #D97706;
+            --royal-blue: #1E3A8A;
+        }
+
+        body {
+            font-family: 'Noto Serif Devanagari', 'Poppins', serif;
+            background-color: #2c221e;
+            background-image: radial-gradient(#42332d 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #1f1916;
+        }
+
+        .font-display {
+            font-family: 'Rozha One', 'Noto Serif Devanagari', serif;
+        }
+
+        .font-eng {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Realistic Wall Calendar Paper Texture */
+        .calendar-sheet {
+            background-color: var(--paper-bg);
+            background-image: 
+                linear-gradient(to right, rgba(217, 119, 6, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(217, 119, 6, 0.04) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8), rgba(244, 234, 213, 0.6));
+            background-size: 24px 24px, 24px 24px, 100% 100%;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                0 4px 12px rgba(0, 0, 0, 0.3),
+                inset 0 0 40px rgba(185, 28, 28, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Diagonal GS Watermark on every sheet */
+        .gs-watermark {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .gs-watermark-inner {
+            transform: rotate(-32deg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.065;
+            user-select: none;
+        }
+
+        /* Page Turn Animation */
+        @keyframes pageFlipIn {
+            0% {
+                opacity: 0.3;
+                transform: perspective(1200px) rotateX(-8deg) translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: perspective(1200px) rotateX(0deg) translateY(0);
+            }
+        }
+
+        .page-animate {
+            animation: pageFlipIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Traditional Ornamental Border */
+        .kaldarshak-border {
+            border: 3px solid #991B1B;
+            outline: 2px solid #D97706;
+            outline-offset: -6px;
+        }
+
+        /* Calendar Grid Cell Hover & Active */
+        .date-cell {
+            transition: all 0.18s ease;
+            background: rgba(255, 253, 248, 0.75);
+        }
+
+        .date-cell:hover {
+            background: #FEF3C7;
+            transform: scale(1.015);
+            z-index: 15;
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.18);
+        }
+
+        .sunday-cell {
+            background: rgba(254, 226, 226, 0.55);
+        }
+
+        .holiday-cell {
+            background: linear-gradient(135deg, rgba(254, 226, 226, 0.75) 0%, rgba(254, 243, 199, 0.75) 100%);
+        }
+
+        /* Custom Scrollbar for Rashifal & Panchang Sidebar */
+        .panchang-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .panchang-scroll::-webkit-scrollbar-track {
+            background: #F5EBD6;
+            border-radius: 8px;
+        }
+        .panchang-scroll::-webkit-scrollbar-thumb {
+            background: #B91C1C;
+            border-radius: 8px;
+        }
+
+        /* Hanging Hole & Spiral Ring Visual at Top */
+        .calendar-hanger {
+            background: linear-gradient(180deg, #991B1B 0%, #7F1D1D 100%);
+            border-bottom: 4px solid #F59E0B;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .calendar-sheet {
+                box-shadow: none !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen py-3 px-2 sm:px-4 md:py-6">
+
+    <!-- Top Control Bar (Outside the printed calendar sheet) -->
+    <div class="max-w-7xl mx-auto mb-4 no-print">
+        <div class="bg-stone-900/95 border border-amber-600/40 rounded-2xl p-3 sm:p-4 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-3 text-amber-50">
+            
+            <!-- Month Navigation -->
+            <div class="flex items-center gap-2 sm:gap-3 w-full lg:w-auto justify-between lg:justify-start">
+                <button id="prevMonthBtn" class="px-3 py-2 bg-red-800 hover:bg-red-700 active:scale-95 text-white rounded-xl font-semibold text-sm flex items-center gap-1 shadow transition cursor-pointer">
+                    <span>◀</span> <span class="hidden sm:inline">पिछला माह</span>
+                </button>
+
+                <div class="flex items-center gap-2">
+                    <select id="monthSelect" aria-label="माह चुनें" class="bg-amber-50 text-red-950 font-bold px-3 py-2 rounded-xl border-2 border-amber-500 text-sm sm:text-base focus:outline-none cursor-pointer">
+                        <option value="0">जनवरी 2027 (January)</option>
+                        <option value="1">फ़रवरी 2027 (February)</option>
+                        <option value="2">मार्च 2027 (March)</option>
+                        <option value="3">अप्रैल 2027 (April)</option>
+                        <option value="4">मई 2027 (May)</option>
+                        <option value="5">जून 2027 (June)</option>
+                        <option value="6">जुलाई 2027 (July)</option>
+                        <option value="7">अगस्त 2027 (August)</option>
+                        <option value="8">सितम्बर 2027 (September)</option>
+                        <option value="9">अक्टूबर 2027 (October)</option>
+                        <option value="10">नवम्बर 2027 (November)</option>
+                        <option value="11">दिसम्बर 2027 (December)</option>
+                    </select>
+                </div>
+
+                <button id="nextMonthBtn" class="px-3 py-2 bg-red-800 hover:bg-red-700 active:scale-95 text-white rounded-xl font-semibold text-sm flex items-center gap-1 shadow transition cursor-pointer">
+                    <span class="hidden sm:inline">अगला माह</span> <span>▶</span>
+                </button>
+            </div>
+
+            <!-- Religion & Holiday Filter Pills -->
+            <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                <span class="text-xs text-amber-300 font-semibold mr-1">फ़िल्टर:</span>
+                <button data-filter="all" class="filter-pill active-pill px-2.5 py-1.5 rounded-full text-xs font-bold bg-amber-500 text-stone-950 shadow cursor-pointer transition">
+                    सभी पर्व (All)
+                </button>
+                <button data-filter="hindu" class="filter-pill px-2.5 py-1.5 rounded-full text-xs font-semibold bg-stone-800 hover:bg-orange-900/60 text-orange-200 border border-orange-500/40 cursor-pointer transition">
+                    🕉️ हिन्दू
+                </button>
+                <button data-filter="muslim" class="filter-pill px-2.5 py-1.5 rounded-full text-xs font-semibold bg-stone-800 hover:bg-emerald-900/60 text-emerald-200 border border-emerald-500/40 cursor-pointer transition">
+                    ☪️ मुस्लिम
+                </button>
+                <button data-filter="other" class="filter-pill px-2.5 py-1.5 rounded-full text-xs font-semibold bg-stone-800 hover:bg-blue-900/60 text-blue-200 border border-blue-500/40 cursor-pointer transition">
+                    ☬ ✝️ ☸️ सिख/ईसाई/जैन
+                </button>
+                <button data-filter="govt" class="filter-pill px-2.5 py-1.5 rounded-full text-xs font-semibold bg-stone-800 hover:bg-red-900/60 text-red-200 border border-red-500/40 cursor-pointer transition">
+                    🏛️ राजकीय अवकाश
+                </button>
+            </div>
+
+            <!-- Print Button -->
+            <div class="hidden xl:flex items-center gap-2">
+                <button onclick="window.print()" class="px-3.5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1.5 cursor-pointer transition">
+                    🖨️ प्रिंट करें (Print)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN WALL CALENDAR SHEET -->
+    <main id="calendarSheet" class="max-w-7xl mx-auto calendar-sheet rounded-2xl kaldarshak-border page-animate">
+        
+        <!-- Diagonal Semi-Transparent Watermark on Every Page -->
+        <div class="gs-watermark" aria-hidden="true">
+            <div class="gs-watermark-inner">
+                <div class="text-[110px] sm:text-[170px] md:text-[220px] font-black tracking-widest text-red-900 leading-none font-eng">
+                    GS
+                </div>
+                <div class="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-[0.25em] text-red-900 uppercase mt-2">
+                    GS CALENDAR 2027
+                </div>
+                <div class="text-lg sm:text-2xl font-bold text-amber-900 mt-1">
+                    ॥ श्री गणेशाय नमः • जी.एस. कालदर्शक पंचांग ॥
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Wall Calendar Binding & Auspicious Header -->
+        <header class="calendar-hanger text-white px-3 sm:px-6 pt-3 pb-4 relative z-10">
+            <!-- Decorative Hanging Eyelet -->
+            <div class="w-6 h-6 rounded-full bg-stone-900 border-4 border-amber-400 mx-auto -mt-1 mb-2 shadow-inner flex items-center justify-center">
+                <div class="w-2 h-2 rounded-full bg-amber-200"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 items-center gap-3">
+                <!-- Left Auspicious Mantra & Vikram Samvat -->
+                <div class="md:col-span-3 flex flex-col items-center md:items-start text-center md:text-left bg-red-950/50 border border-amber-400/40 rounded-xl p-2.5">
+                    <div class="flex items-center gap-2 text-amber-300 font-bold text-sm sm:text-base">
+                        <span>卐</span>
+                        <span>॥ श्री गणेशाय नमः ॥</span>
+                        <span>ॐ</span>
+                    </div>
+                    <div id="vikramSamvatHeader" class="text-xs sm:text-sm text-amber-100 font-semibold mt-1">
+                        विक्रम संवत २०८३ - २०८४
+                    </div>
+                    <div id="shakaSamvatHeader" class="text-[11px] text-amber-300/90">
+                        शक संवत १९४८ • उत्तरायण
+                    </div>
+                </div>
+
+                <!-- Center Brand Title: GS Calendar 2027 -->
+                <div class="md:col-span-6 text-center">
+                    <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-amber-500 text-red-950 text-[11px] sm:text-xs font-extrabold tracking-wider uppercase shadow">
+                        <span>🪔</span> शुद्ध वैदिक एवं सर्वधर्म कालदर्शक पंचांग <span>🪔</span>
+                    </div>
+                    <h1 class="font-display text-3xl sm:text-5xl md:text-6xl text-amber-300 tracking-wide drop-shadow-[0_3px_3px_rgba(0,0,0,0.7)] mt-1">
+                        GS Calendar <span class="text-white font-eng font-extrabold">2027</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm md:text-base font-bold text-amber-100 tracking-wide">
+                        जी.एस. कैलेंडर २०२७ — सम्पूर्ण भारत का विश्वसनीय कालदर्शक
+                    </p>
+                </div>
+
+                <!-- Right Hijri Year & Hindi Month Info -->
+                <div class="md:col-span-3 flex flex-col items-center md:items-end text-center md:text-right bg-red-950/50 border border-amber-400/40 rounded-xl p-2.5">
+                    <div class="flex items-center gap-1.5 text-emerald-300 font-bold text-sm sm:text-base">
+                        <span>☪️</span>
+                        <span id="hijriYearHeader">हिजरी सन् १४४८ - १४४९</span>
+                    </div>
+                    <div id="hijriMonthsHeader" class="text-xs sm:text-sm text-amber-100 font-semibold mt-1">
+                        रजब - शाबान १४४८ हि.
+                    </div>
+                    <div class="text-[11px] text-amber-300/90">
+                        सर्वधर्म पर्व एवं राजकीय अवकाश सहित
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sub-Header Strip: Current Month Banner (English + Hindi + Hijri) -->
+        <div class="bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 border-b-2 border-red-900 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 relative z-10 shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="bg-red-800 text-amber-200 px-3 py-1 rounded-lg font-extrabold text-sm sm:text-base shadow">
+                    माह <span id="monthNumberBadge">01</span>
+                </span>
+                <h2 id="currentMonthHindi" class="text-xl sm:text-2xl md:text-3xl font-black text-red-950">
+                    जनवरी २०२७
+                </h2>
+                <span id="currentMonthEng" class="text-lg sm:text-2xl font-extrabold font-eng text-red-900 uppercase tracking-wide">
+                    JANUARY 2027
+                </span>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm font-bold text-red-950">
+                <span id="hindiMasaBadge" class="bg-white/85 px-3 py-1 rounded-full border border-red-800/30 shadow-xs">
+                    पौष - माघ (विक्रम संवत २०८३)
+                </span>
+                <span id="rituBadge" class="bg-red-900 text-amber-100 px-3 py-1 rounded-full shadow-xs">
+                    ऋतु: शिशिर
+                </span>
+            </div>
+        </div>
+
+        <!-- MAIN BODY: Left 8 Columns (Calendar Grid + Holidays Legend) & Right 4 Columns (Kaldarshak Rashifal & Jyotish) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 p-3 sm:p-5 relative z-10">
+            
+            <!-- LEFT SECTION: 7-Day Calendar Grid & Monthly Festival Summary -->
+            <div class="lg:col-span-8 flex flex-col gap-4">
+                
+                <!-- Weekday Header Row -->
+                <div class="grid grid-cols-7 rounded-t-xl overflow-hidden border-2 border-red-900 shadow-sm text-center">
+                    <div class="bg-red-800 text-white py-2 px-1">
+                        <div class="text-xs sm:text-sm md:text-base font-black">रविवार</div>
+                        <div class="text-[10px] sm:text-xs font-eng font-semibold text-amber-200">SUN</div>
+                    </div>
+                    <div class="bg-amber-900 text-amber-50 py-2 px-1 border-l border-amber-700">
+                        <div class="text-xs sm:text-sm md:text-base font-bold">सोमवार</div>
+                        <div class="text-[10px] sm:text-xs font-eng text-amber-200">MON</div>
+                    </div>
+                    <div class="bg-amber-900 text-amber-50 py-2 px-1 border-l border-amber-700">
+                        <div class="text-xs sm:text-sm md:text-base font-bold">मंगलवार</div>
+                        <div class="text-[10px] sm:text-xs font-eng text-amber-200">TUE</div>
+                    </div>
+                    <div class="bg-amber-900 text-amber-50 py-2 px-1 border-l border-amber-700">
+                        <div class="text-xs sm:text-sm md:text-base font-bold">बुधवार</div>
+                        <div class="text-[10px] sm:text-xs font-eng text-amber-200">WED</div>
+                    </div>
+                    <div class="bg-amber-900 text-amber-50 py-2 px-1 border-l border-amber-700">
+                        <div class="text-xs sm:text-sm md:text-base font-bold">गुरुवार</div>
+                        <div class="text-[10px] sm:text-xs font-eng text-amber-200">THU</div>
+                    </div>
+                    <div class="bg-amber-900 text-amber-50 py-2 px-1 border-l border-amber-700">
+                        <div class="text-xs sm:text-sm md:text-base font-bold">शुक्रवार</div>
+                        <div class="text-[10px] sm:text-xs font-eng text-amber-200">FRI</div>
+                    </div>
+                    <div class="bg-blue-950 text-amber-50 py-2 px-1 border-l border-amber-700">
+                        <div class="text-xs sm:text-sm md:text-base font-bold">शनिवार</div>
+                        <div class="text-[10px] sm:text-xs font-eng text-amber-200">SAT</div>
+                    </div>
+                </div>
+
+                <!-- Calendar Dates Grid -->
+                <div id="calendarGrid" class="grid grid-cols-7 border-x-2 border-b-2 border-red-900 rounded-b-xl overflow-hidden -mt-4 bg-amber-900/20 gap-[1px]">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Color Legend Strip -->
+                <div class="bg-amber-100/90 border border-amber-400 rounded-xl px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs font-semibold text-stone-800">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-600 inline-block"></span> रविवार / राजकीय अवकाश</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500 border border-amber-800 inline-block"></span> पूर्णिमा (Purnima)</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-stone-900 inline-block"></span> अमावस्या (Amavasya)</span>
+                        <span class="flex items-center gap-1"><span class="text-emerald-800 font-bold">हि.</span> इस्लामी हिजरी तारीख</span>
+                    </div>
+                    <div class="text-red-800 font-bold">
+                        * किसी भी तारीख पर क्लिक कर विस्तृत पंचांग देखें
+                    </div>
+                </div>
+
+                <!-- Monthly Festivals & Government Holidays List Box -->
+                <div class="bg-white/90 border-2 border-red-900/80 rounded-xl p-3.5 shadow-sm">
+                    <div class="flex items-center justify-between border-b-2 border-amber-400 pb-2 mb-3">
+                        <h3 class="text-base sm:text-lg font-black text-red-900 flex items-center gap-2">
+                            <span>🎊</span> इस माह के प्रमुख व्रत, त्योहार एवं राजकीय अवकाश
+                        </h3>
+                        <span id="festivalCountBadge" class="bg-red-800 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+                            0 पर्व
+                        </span>
+                    </div>
+                    <div id="monthlyFestivalsList" class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT SECTION: Kaldarshak Jyotish Ganana & Monthly Rashifal Sidebar -->
+            <aside class="lg:col-span-4 flex flex-col gap-4">
+                
+                <!-- Kaldarshak Jyotish Ganana Card -->
+                <div class="bg-gradient-to-b from-red-950 to-red-900 text-amber-50 rounded-xl border-2 border-amber-500 p-3.5 shadow-md">
+                    <div class="flex items-center justify-between border-b border-amber-400/40 pb-2 mb-2.5">
+                        <h3 class="text-base sm:text-lg font-extrabold text-amber-300 flex items-center gap-1.5">
+                            <span>🪐</span> कालदर्शक ज्योतिष गणना
+                        </h3>
+                        <span class="text-[11px] bg-amber-500 text-red-950 font-extrabold px-2 py-0.5 rounded">पंचांग सार</span>
+                    </div>
+
+                    <div id="jyotishBox" class="space-y-2.5 text-xs sm:text-sm">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Monthly Rashifal (मासिक राशिफल) Card -->
+                <div class="bg-amber-50/95 border-2 border-red-900 rounded-xl p-3.5 shadow-md flex-1 flex flex-col">
+                    <div class="flex items-center justify-between border-b-2 border-red-800 pb-2 mb-2.5">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-red-900 flex items-center gap-1.5">
+                                <span>♈</span> मासिक राशिफल (Rashifal)
+                            </h3>
+                            <p id="rashifalMonthSubtitle" class="text-[11px] text-stone-600 font-semibold">
+                                जनवरी 2027 — सभी १२ राशियों का फल
+                            </p>
+                        </div>
+                        <span class="text-xl">🔮</span>
+                    </div>
+
+                    <!-- Scrollable 12 Rashis List -->
+                    <div id="rashifalContainer" class="space-y-2.5 overflow-y-auto max-h-[540px] pr-1 panchang-scroll">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+            </aside>
+        </div>
+
+        <!-- Bottom Footer Strip of Wall Calendar -->
+        <footer class="bg-red-950 text-amber-200 border-t-4 border-amber-500 px-4 py-3 text-center sm:flex items-center justify-between text-xs relative z-10">
+            <div class="font-bold">
+                © 2027 <span class="text-amber-400">GS Calendar (जी.एस. कैलेंडर)</span> — सर्वाधिकार सुरक्षित
+            </div>
+            <div class="mt-1 sm:mt-0 text-amber-100/90">
+                नोट: स्थानीय सूर्योदय एवं चन्द्र दर्शन के अनुसार तिथि व मुस्लिम पर्वों में १ दिन का अंतर संभव है।
+            </div>
+        </footer>
+    </main>
+
+    <!-- Detailed Day Panchang Modal (Triggered on clicking any date cell) -->
+    <div id="dayModal" class="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 hidden items-center justify-center p-3 sm:p-4">
+        <div class="bg-[#FCF8EE] border-4 border-red-900 outline-2 outline-amber-500 -outline-offset-8 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative animate-[pageFlipIn_0.25s_ease-out]">
+            <button id="closeModalBtn" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-red-800 hover:bg-red-700 text-white font-bold flex items-center justify-center shadow cursor-pointer">
+                ✕
+            </button>
+
+            <div class="text-center border-b-2 border-amber-400 pb-3 mb-4">
+                <div class="text-xs font-extrabold text-red-800 uppercase tracking-wider">GS Calendar 2027 • दैनिक कालदर्शक पंचांग</div>
+                <h3 id="modalDateTitle" class="text-2xl sm:text-3xl font-black text-stone-900 mt-1">
+                    14 जनवरी 2027, गुरुवार
+                </h3>
+                <div id="modalSubDates" class="text-xs sm:text-sm font-bold text-red-900 mt-1">
+                    विक्रम संवत २०८३ • हिजरी सन् १४४८
+                </div>
+            </div>
+
+            <div id="modalFestivalBanner" class="hidden mb-4 p-3 rounded-xl bg-gradient-to-r from-red-100 to-amber-100 border border-red-400 text-center">
+                <!-- Populated if festival exists -->
+            </div>
+
+            <div id="modalPanchangDetails" class="grid grid-cols-2 gap-2.5 text-xs sm:text-sm">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-amber-300 flex justify-between items-center text-[11px] text-stone-600 font-semibold">
+                <span>GS Calendar 2027 प्रमाणित गणना</span>
+                <button id="modalOkBtn" class="px-4 py-1.5 bg-red-800 hover:bg-red-700 text-white rounded-lg font-bold text-xs cursor-pointer">
+                    बंद करें (Close)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // GS CALENDAR 2027 - COMPREHENSIVE DATA & PANCHANG ENGINE
+        // ============================================================================
+
+        const HINDI_MONTHS_ENG = [
+            "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+            "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+        ];
+
+        const HINDI_MONTHS_NAME = [
+            "जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून",
+            "जुलाई", "अगस्त", "सितम्बर", "अक्टूबर", "नवम्बर", "दिसम्बर"
+        ];
+
+        const WEEKDAYS_HI = ["रविवार", "सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार"];
+
+        const NAKSHATRAS = [
+            "अश्विनी", "भरणी", "कृत्तिका", "रोहिणी", "मृगशिरा", "आर्द्रा", "पुनर्वसु",
+            "पुष्य", "आश्लेषा", "मघा", "पूर्वाफाल्गुनी", "उत्तराफाल्गुनी", "हस्त", "चित्रा",
+            "स्वाती", "विशाखा", "अनुराधा", "ज्येष्ठा", "मूल", "पूर्वाषाढ़ा", "उत्तराषाढ़ा",
+            "श्रवण", "धनिष्ठा", "शतभिषा", "पूर्वाभाद्रपद", "उत्तराभाद्रपद", "रेवती"
+        ];
+
+        const YOGAS = [
+            "विष्कम्भ", "प्रीति", "आयुष्मान", "सौभाग्य", "शोभन", "अतिगण्ड", "सुकर्मा",
+            "धृति", "शूल", "गण्ड", "वृद्धि", "ध्रुव", "व्याघात", "हर्षण", "वज्र",
+            "सिद्धि", "व्यतीपात", "वरीयान", "परिघ", "शिव", "सिद्ध", "साध्य", "शुभ", "शुक्ल", "ब्रह्म", "ऐन्द्र", "वैधृति"
+        ];
+
+        const RAHUKAAL_BY_DAY = [
+            "सायं 04:30 से 06:00", // Sun
+            "प्रातः 07:30 से 09:00", // Mon
+            "अपराह्न 03:00 से 04:30", // Tue
+            "दोपहर 12:00 से 01:30", // Wed
+            "दोपहर 01:30 से 03:00", // Thu
+            "प्रातः 10:30 से 12:00", // Fri
+            "प्रातः 09:00 से 10:30"  // Sat
+        ];
+
+        // 2027 Month-by-Month Panchang, Tithi Mapping, Hijri Mapping, Jyotish & Rashifal Data
+        // Note: Vikram Samvat 2083 runs until Chaitra Shukla Pratipada (April 7, 2027), when VS 2084 begins.
+        // Hijri 1448 runs until Muharram 1 (June 6, 2027), when Hijri 1449 begins.
+        const CALENDAR_2027 = [
+            {
+                // 0: JANUARY 2027 (Starts Friday, 31 days)
+                hindiMasa: "पौष - माघ",
+                vikramSamvat: "विक्रम संवत २०८३",
+                shakaSamvat: "शक संवत १९४८ • उत्तरायण",
+                ritu: "शिशिर ऋतु",
+                hijriYear: "हिजरी सन् १४४८",
+                hijriMonths: "रजब - शाबान १४४८ हि.",
+                // Jan 1, 2027 = Pausha Krishna Navami (Tithi idx 23 in 0..29 lunar cycle)
+                startTithiIndex: 23,
+                lunarMonth1: "पौष",
+                lunarMonth2: "माघ",
+                monthSwitchDay: 22, // Pausha Amavasya on Jan 7, Shukla starts Jan 8, Magha starts Jan 23
+                // Jan 1, 2027 = 22 Rajab 1448
+                hijriStartDay: 22,
+                hijriM1: "रजब",
+                hijriM2: "शाबान",
+                hijriDaysInM1: 30,
+                sunrise: "07:14 AM",
+                sunset: "05:42 PM",
+                jyotish: {
+                    vivah: "16, 17, 22, 23, 27, 28, 29 जनवरी",
+                    grihaPravesh: "22, 27, 29 जनवरी",
+                    vahan: "1, 6, 10, 15, 20, 24, 29 जनवरी",
+                    panchak: "10 जनवरी (प्रातः 08:12) से 14 जनवरी (रात्रि 09:40)",
+                    grahan: "इस माह कोई ग्रहण नहीं है।",
+                    vishesh: "14 जनवरी से सूर्य मकर राशि में प्रवेश कर उत्तरायण होंगे।"
+                },
+                festivals: [
+                    { day: 1, title: "नव वर्ष 2027 (New Year)", type: "other", isGovt: false },
+                    { day: 3, title: "सफला एकादशी", type: "hindu", isGovt: false },
+                    { day: 7, title: "पौष अमावस्या", type: "hindu", isGovt: false },
+                    { day: 13, title: "लोहड़ी पर्व", type: "other", isGovt: false },
+                    { day: 14, title: "मकर संक्रांति / पोंगल", type: "hindu", isGovt: true },
+                    { day: 16, title: "हज़रत अली जन्मदिवस", type: "muslim", isGovt: false },
+                    { day: 18, title: "पुत्रदा एकादशी", type: "hindu", isGovt: false },
+                    { day: 22, title: "पौष पूर्णिमा / शाकम्भरी जयंती", type: "hindu", isGovt: false },
+                    { day: 26, title: "गणतंत्र दिवस (Republic Day)", type: "govt", isGovt: true },
+                    { day: 26, title: "संकष्टी गणेश चतुर्थी", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "कार्यक्षेत्र में पदोन्नति के योग। सूर्य के मकर गोचर से मान-सम्मान बढ़ेगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "भाग्य का भरपूर साथ मिलेगा। रुका हुआ धन प्राप्त होने की प्रबल संभावना है।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "स्वास्थ्य के प्रति सतर्क रहें। माह के उत्तरार्ध में व्यापारिक यात्रा लाभदायक रहेगी।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "दाम्पत्य जीवन में मधुरता आएगी। साझेदारी के कार्यों में सफलता मिलेगी।", lucky: "दूधिया • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "शत्रुओं पर विजय प्राप्त होगी। प्रतियोगी परीक्षाओं में छात्रों को शुभ समाचार मिलेगा।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "संतान पक्ष से सुखद समाचार। रचनात्मक कार्यों और निवेश से अच्छा लाभ होगा।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "भूमि-भवन या वाहन खरीदने के शुभ योग बन रहे हैं। पारिवारिक सुख बढ़ेगा।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "पराक्रम में वृद्धि होगी। भाई-बहनों के सहयोग से महत्वपूर्ण कार्य पूर्ण होंगे।", lucky: "सिंदूरी • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "आर्थिक स्थिति मजबूत होगी। वाणी की मधुरता से बिगड़े काम बनेंगे।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "आत्मविश्वास में वृद्धि होगी। समाज में नई पहचान और प्रतिष्ठा प्राप्त होगी।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "अनावश्यक खर्चों पर नियंत्रण रखें। विदेश यात्रा या लंबी दूरी की यात्रा संभव है।", lucky: "आसमानी • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "आय के नए स्रोत खुलेंगे। मित्रों के सहयोग से रुकी हुई योजनाएं गति पकड़ेंगी।", lucky: "केसरिया • अंक 3" }
+                ]
+            },
+            {
+                // 1: FEBRUARY 2027 (Starts Monday, 28 days)
+                hindiMasa: "माघ - फाल्गुन",
+                vikramSamvat: "विक्रम संवत २०८३",
+                shakaSamvat: "शक संवत १९४८ • उत्तरायण",
+                ritu: "शिशिर - वसंत ऋतु",
+                hijriYear: "हिजरी सन् १४४८",
+                hijriMonths: "शाबान - रमज़ान १४४८ हि.",
+                startTithiIndex: 24, // Magha Krishna Dashami
+                lunarMonth1: "माघ",
+                lunarMonth2: "फाल्गुन",
+                monthSwitchDay: 21,
+                hijriStartDay: 23, // 23 Rajab -> Sha'ban starts Feb 8
+                hijriM1: "रजब",
+                hijriM2: "शाबान",
+                hijriDaysInM1: 30,
+                sunrise: "07:02 AM",
+                sunset: "06:08 PM",
+                jyotish: {
+                    vivah: "4, 5, 6, 11, 14, 15, 19, 20, 21, 28 फ़रवरी",
+                    grihaPravesh: "6, 11, 15, 20 फ़रवरी",
+                    vahan: "3, 5, 12, 14, 21, 24 फ़रवरी",
+                    panchak: "6 फ़रवरी (दोपहर 03:20) से 11 फ़रवरी (प्रातः 04:10)",
+                    grahan: "6 फ़रवरी को वलयाकार सूर्य ग्रहण (भारत में अदृश्य)।",
+                    vishesh: "माघ स्नान एवं महाशिवरात्रि व्रत का विशेष पुण्य काल।"
+                },
+                festivals: [
+                    { day: 2, title: "षटतिला एकादशी", type: "hindu", isGovt: false },
+                    { day: 6, title: "मौनी अमावस्या (माघ अमावस्या)", type: "hindu", isGovt: false },
+                    { day: 11, title: "बसंत पंचमी / सरस्वती पूजा", type: "hindu", isGovt: true },
+                    { day: 16, title: "जया एकादशी", type: "hindu", isGovt: false },
+                    { day: 20, title: "माघ पूर्णिमा / गुरु रविदास जयंती", type: "hindu", isGovt: true },
+                    { day: 22, title: "शब-ए-बारात (Shab-e-Barat)", type: "muslim", isGovt: false },
+                    { day: 24, title: "द्विजप्रिय संकष्टी चतुर्थी", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "आर्थिक लाभ के उत्तम अवसर मिलेंगे। कार्यक्षेत्र में उच्चाधिकारियों का सहयोग रहेगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "नौकरी में स्थानांतरण या नई जिम्मेदारी मिल सकती है। परिवार में उत्सव का माहौल रहेगा।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "धार्मिक कार्यों में रुचि बढ़ेगी। भाग्य के सहयोग से लंबे समय से अटके काम पूरे होंगे।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "वाहन सावधानी से चलाएं। गुप्त शत्रुओं से सावधान रहें, माह के अंत में राहत मिलेगी।", lucky: "सफ़ेद • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "व्यापार में विस्तार के योग हैं। जीवनसाथी के साथ संबंधों में प्रगाढ़ता आएगी।", lucky: "नारंगी • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "स्वास्थ्य में सुधार होगा। पुराने कर्ज से मुक्ति मिलने के संकेत हैं।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "विद्यार्थियों के लिए यह माह अत्यंत शुभ है। प्रेम संबंधों में सफलता मिलेगी।", lucky: "चमकीला • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "माता के स्वास्थ्य का ध्यान रखें। घर में सुख-सुविधाओं की वस्तुओं की खरीदारी होगी।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "आत्मविश्वास व साहस में वृद्धि होगी। मीडिया और लेखन से जुड़े लोगों को सम्मान मिलेगा।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "पैतृक संपत्ति से लाभ हो सकता है। परिवार में किसी मांगलिक कार्य की रूपरेखा बनेगी।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "सूर्य के आपकी राशि में आने से तेज व प्रभाव बढ़ेगा। नए संपर्क लाभकारी सिद्ध होंगे।", lucky: "बैंगनी • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "आध्यात्मिक उन्नति होगी। दान-पुण्य में खर्च होगा, जिससे मानसिक शांति मिलेगी।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 2: MARCH 2027 (Starts Monday, 31 days)
+                hindiMasa: "फाल्गुन - चैत्र",
+                vikramSamvat: "विक्रम संवत २०८३",
+                shakaSamvat: "शक संवत १९४८ - १९४९ • उत्तरायण",
+                ritu: "वसंत ऋतु",
+                hijriYear: "हिजरी सन् १४४८",
+                hijriMonths: "रमज़ान - शव्वाल १४४८ हि.",
+                startTithiIndex: 22, // Phalguna Krishna Ashtami
+                lunarMonth1: "फाल्गुन",
+                lunarMonth2: "चैत्र",
+                monthSwitchDay: 22,
+                hijriStartDay: 22, // 22 Sha'ban -> Ramadan starts around Mar 10
+                hijriM1: "शाबान",
+                hijriM2: "रमज़ान",
+                hijriDaysInM1: 30,
+                sunrise: "06:36 AM",
+                sunset: "06:28 PM",
+                jyotish: {
+                    vivah: "1, 2, 4, 5, 6, 7, 10, 12, 13 मार्च (14 से खरमास प्रारंभ)",
+                    grihaPravesh: "4, 6, 10, 13 मार्च",
+                    vahan: "1, 5, 10, 12, 19, 24, 29 मार्च",
+                    panchak: "5 मार्च (रात्रि 10:15) से 10 मार्च (प्रातः 11:30)",
+                    grahan: "इस माह कोई ग्रहण नहीं है।",
+                    vishesh: "14 मार्च से सूर्य मीन राशि में (खरमास प्रारंभ), शुभ विवाह स्थगित।"
+                },
+                festivals: [
+                    { day: 3, title: "विजया एकादशी", type: "hindu", isGovt: false },
+                    { day: 6, title: "महाशिवरात्रि (Mahashivratri)", type: "hindu", isGovt: true },
+                    { day: 8, title: "फाल्गुन अमावस्या", type: "hindu", isGovt: false },
+                    { day: 10, title: "रमज़ान रोज़ा प्रारंभ (Ramadan)", type: "muslim", isGovt: false },
+                    { day: 18, title: "आमलकी एकादशी", type: "hindu", isGovt: false },
+                    { day: 21, title: "होलिका दहन / फाल्गुन पूर्णिमा", type: "hindu", isGovt: false },
+                    { day: 22, title: "होली / धुलेंडी (Holi)", type: "hindu", isGovt: true },
+                    { day: 26, title: "गुड फ्राइडे (Good Friday)", type: "other", isGovt: true },
+                    { day: 28, title: "ईस्टर संडे (Easter Sunday)", type: "other", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "आर्थिक योजनाओं में निवेश से पहले बड़ों की सलाह लें। माह के अंत में शुभ समाचार मिलेगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "आय के साधनों में वृद्धि होगी। मित्रों के साथ मनोरंजक यात्रा के योग बनेंगे।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "कार्यक्षेत्र में आपकी कार्यकुशलता की सराहना होगी। व्यापार में अच्छा मुनाफा होगा।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "धार्मिक यात्रा का योग है। उच्च शिक्षा की तैयारी कर रहे छात्रों को सफलता मिलेगी।", lucky: "मोती रंग • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "खान-पान पर संयम रखें। गुप्त धन या बीमा आदि से लाभ होने की संभावना है।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "व्यापारिक साझेदारी से लाभ होगा। जीवनसाथी का पूर्ण सहयोग प्राप्त होगा।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "विरोधी शांत रहेंगे। कोर्ट-कचहरी के मामलों में सफलता मिलने के प्रबल योग हैं।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "संतान की उन्नति से मन प्रसन्न रहेगा। कला और संगीत के क्षेत्र में रुचि बढ़ेगी।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "पारिवारिक जिम्मेदारियों का निर्वहन भली-भांति करेंगे। संपत्ति विवाद सुलझेंगे।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "छोटी यात्राएं लाभदायक रहेंगी। साहस और आत्मबल से कठिन कार्य भी पूरे कर लेंगे।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "धन संचय करने में सफल रहेंगे। परिवार में मेहमानों का आगमन व प्रसन्नता रहेगी।", lucky: "आसमानी • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "मानसिक प्रसन्नता बनी रहेगी। नए कार्यों की शुरुआत के लिए समय अनुकूल है।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 3: APRIL 2027 (Starts Thursday, 30 days)
+                hindiMasa: "चैत्र - वैशाख",
+                vikramSamvat: "विक्रम संवत २०८४ प्रारंभ",
+                shakaSamvat: "शक संवत १९४९ • उत्तरायण",
+                ritu: "वसंत - ग्रीष्म ऋतु",
+                hijriYear: "हिजरी सन् १४४८",
+                hijriMonths: "रमज़ान - शव्वाल १४४८ हि.",
+                startTithiIndex: 23, // Chaitra Krishna Navami -> Amavasya on Apr 6 -> VS 2084 starts Apr 7!
+                lunarMonth1: "चैत्र",
+                lunarMonth2: "वैशाख",
+                monthSwitchDay: 20,
+                hijriStartDay: 23, // 23 Ramadan -> Eid-ul-Fitr around Apr 8/9
+                hijriM1: "रमज़ान",
+                hijriM2: "शव्वाल",
+                hijriDaysInM1: 30,
+                sunrise: "06:03 AM",
+                sunset: "06:44 PM",
+                jyotish: {
+                    vivah: "15, 16, 17, 21, 22, 23, 27, 28, 29 अप्रैल (14 को खरमास समाप्त)",
+                    grihaPravesh: "16, 21, 22, 28 अप्रैल",
+                    vahan: "7, 9, 14, 16, 21, 25, 30 अप्रैल",
+                    panchak: "2 अप्रैल से 6 अप्रैल तक एवं 29 अप्रैल से 3 मई तक",
+                    grahan: "इस माह कोई ग्रहण नहीं है।",
+                    vishesh: "7 अप्रैल से हिन्दू नववर्ष विक्रम संवत २०८४ (सिद्धार्थ संवत्सर) प्रारंभ।"
+                },
+                festivals: [
+                    { day: 2, title: "पापमोचिनी एकादशी", type: "hindu", isGovt: false },
+                    { day: 6, title: "चैत्र अमावस्या", type: "hindu", isGovt: false },
+                    { day: 7, title: "गुड़ी पड़वा / चैत्र नवरात्रि / नव संवत्सर २०८४", type: "hindu", isGovt: true },
+                    { day: 8, title: "चेटीचंड (झूलेलाल जयंती)", type: "hindu", isGovt: false },
+                    { day: 9, title: "ईद-उल-फ़ित्र (Eid-ul-Fitr)", type: "muslim", isGovt: true },
+                    { day: 14, title: "बैसाखी / डॉ. अम्बेडकर जयंती", type: "other", isGovt: true },
+                    { day: 15, title: "श्री राम नवमी (Ram Navami)", type: "hindu", isGovt: true },
+                    { day: 17, title: "कामदा एकादशी", type: "hindu", isGovt: false },
+                    { day: 19, title: "महावीर जयंती (Mahavir Jayanti)", type: "other", isGovt: true },
+                    { day: 20, title: "हनुमान जयंती / चैत्र पूर्णिमा", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "सूर्य के उच्च राशि में आने से करियर में जबरदस्त उछाल आएगा। नेतृत्व क्षमता बढ़ेगी।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "विदेशी संपर्कों से लाभ होगा। सुख-सुविधाओं पर धन व्यय होगा, बजट बनाकर चलें।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "आर्थिक लाभ के प्रबल योग हैं। बड़े भाई-बहनों का सहयोग व मार्गदर्शन प्राप्त होगा।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "नौकरीपेशा लोगों को प्रमोशन व वेतन वृद्धि की सौगात मिल सकती है।", lucky: "सफ़ेद • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "भाग्य का सितारा बुलंद रहेगा। तीर्थयात्रा या धार्मिक अनुष्ठान का आयोजन होगा।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "स्वास्थ्य के प्रति सचेत रहें। शोध एवं गूढ़ विषयों में रुचि रखने वालों को सफलता मिलेगी।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "व्यापार में नए अनुबंध होंगे। अविवाहितों के लिए विवाह के उत्तम प्रस्ताव आएंगे।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "कार्यक्षेत्र में प्रतिस्पर्धियों पर भारी पड़ेंगे। ननिहाल पक्ष से शुभ समाचार मिलेगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "संतान की उपलब्धियों से गौरव महसूस करेंगे। शेयर बाजार व निवेश में सोच-समझकर कदम बढ़ाएं।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "नया घर या वाहन खरीदने का सपना पूरा हो सकता है। पारिवारिक शांति बनी रहेगी।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "आत्मविश्वास से लबरेज रहेंगे। संचार व तकनीकी क्षेत्र से जुड़े लोगों को विशेष लाभ।", lucky: "नीला • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "धन आगमन के योग प्रबल हैं। पारिवारिक उत्सव में शामिल होने का अवसर मिलेगा।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 4: MAY 2027 (Starts Saturday, 31 days)
+                hindiMasa: "वैशाख - ज्येष्ठ",
+                vikramSamvat: "विक्रम संवत २०८४",
+                shakaSamvat: "शक संवत १९४९ • उत्तरायण",
+                ritu: "ग्रीष्म ऋतु",
+                hijriYear: "हिजरी सन् १४४८",
+                hijriMonths: "शव्वाल - ज़िलक़ाद १४४८ हि.",
+                startTithiIndex: 24, // Vaishakha Krishna Dashami -> Amavasya on May 6 -> Akshaya Tritiya May 9
+                lunarMonth1: "वैशाख",
+                lunarMonth2: "ज्येष्ठ",
+                monthSwitchDay: 20,
+                hijriStartDay: 23, // 23 Shawwal -> Dhul Qadah starts May 8
+                hijriM1: "शव्वाल",
+                hijriM2: "ज़िलक़ाद",
+                hijriDaysInM1: 29,
+                sunrise: "05:38 AM",
+                sunset: "07:01 PM",
+                jyotish: {
+                    vivah: "2, 3, 7, 8, 9, 13, 14, 19, 21, 22, 26, 28, 30 मई",
+                    grihaPravesh: "3, 8, 9, 14, 21, 28 मई",
+                    vahan: "2, 7, 9, 14, 19, 24, 28 मई",
+                    panchak: "26 मई (दोपहर 01:40) से 31 मई (प्रातः 03:10)",
+                    grahan: "इस माह कोई ग्रहण नहीं है।",
+                    vishesh: "9 मई को अक्षय तृतीया (अबूझ मुहूर्त) - सभी शुभ कार्यों हेतु श्रेष्ठ दिन।"
+                },
+                festivals: [
+                    { day: 1, title: "मज़दूर दिवस / महाराष्ट्र दिवस", type: "govt", isGovt: false },
+                    { day: 2, title: "वरुथिनी एकादशी", type: "hindu", isGovt: false },
+                    { day: 6, title: "वैशाख अमावस्या / शनि जयंती", type: "hindu", isGovt: false },
+                    { day: 9, title: "अक्षय तृतीया / परशुराम जयंती", type: "hindu", isGovt: false },
+                    { day: 17, title: "मोहिनी एकादशी", type: "hindu", isGovt: false },
+                    { day: 20, title: "बुद्ध पूर्णिमा / वैशाख पूर्णिमा", type: "other", isGovt: true },
+                    { day: 24, title: "एकदंत संकष्टी चतुर्थी", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "आर्थिक स्थिति सुदृढ़ होगी। वाणी में सौम्यता बनाए रखें, पारिवारिक सहयोग मिलेगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "व्यक्तित्व में निखार आएगा। रुके हुए सरकारी काम इस माह आसानी से बन जाएंगे।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "खर्चों में बढ़ोतरी संभव है, किंतु आय भी बनी रहेगी। नींद और विश्राम का ध्यान रखें।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "मनोकामनाएं पूर्ण होने का समय है। व्यापार में अप्रत्याशित मुनाफा हो सकता है।", lucky: "सफ़ेद • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "कार्यक्षेत्र में मान-प्रतिष्ठा बढ़ेगी। पिता के सहयोग से कोई बड़ा कार्य संपन्न होगा।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "भाग्य का साथ मिलेगा। उच्च अधिकारियों से मधुर संबंध बनेंगे, यात्रा सुखद रहेगी।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "वाहन व मशीनरी के प्रयोग में सावधानी बरतें। आध्यात्मिक चिंतन से शांति मिलेगी।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "जीवनसाथी के साथ व्यापारिक लाभ के योग हैं। सामाजिक दायरा बढ़ेगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "रोग व शत्रुओं से मुक्ति मिलेगी। नौकरी में आपके परिश्रम का उचित फल मिलेगा।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "बुद्धि और विवेक से लिए गए निर्णय लाभ देंगे। संतान पक्ष से खुशी मिलेगी।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "घर-परिवार में सुख-शांति रहेगी। भूमि-संपत्ति से जुड़े सौदों में लाभ होगा।", lucky: "आसमानी • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "पराक्रम व आत्मविश्वास में वृद्धि होगी। छोटे भाई-बहनों का सहयोग प्राप्त होगा।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 5: JUNE 2027 (Starts Tuesday, 30 days)
+                hindiMasa: "ज्येष्ठ - आषाढ़",
+                vikramSamvat: "विक्रम संवत २०८४",
+                shakaSamvat: "शक संवत १९४९ • दक्षिणायन प्रारंभ",
+                ritu: "ग्रीष्म - वर्षा ऋतु",
+                hijriYear: "हिजरी सन् १४४८ - १४४९ प्रारंभ",
+                hijriMonths: "ज़िलहिज्जा १४४८ - मुहर्रम १४४९ हि.",
+                startTithiIndex: 25, // Jyeshtha Krishna Ekadashi -> Amavasya on June 4 -> Hijri 1449 starts June 6
+                lunarMonth1: "ज्येष्ठ",
+                lunarMonth2: "आषाढ़",
+                monthSwitchDay: 19,
+                hijriStartDay: 25, // 25 Dhul Qadah -> Dhul Hijjah starts June 6, Eid-ul-Adha June 15
+                hijriM1: "ज़िलक़ाद",
+                hijriM2: "ज़िलहिज्जा",
+                hijriDaysInM1: 30,
+                sunrise: "05:26 AM",
+                sunset: "07:17 PM",
+                jyotish: {
+                    vivah: "2, 3, 4, 8, 9, 10, 11, 17, 18, 23, 24, 25 जून",
+                    grihaPravesh: "3, 9, 11, 18, 24 जून",
+                    vahan: "2, 6, 11, 16, 20, 25, 30 जून",
+                    panchak: "22 जून (रात्रि 08:50) से 27 जून (प्रातः 10:15)",
+                    grahan: "इस माह कोई ग्रहण नहीं है।",
+                    vishesh: "21 जून से सूर्य दक्षिणायन होंगे। 13 जून को गंगा दशहरा व 15 को निर्जला एकादशी।"
+                },
+                festivals: [
+                    { day: 1, title: "अपरा एकादशी", type: "hindu", isGovt: false },
+                    { day: 4, title: "वट सावित्री व्रत / ज्येष्ठ अमावस्या", type: "hindu", isGovt: false },
+                    { day: 13, title: "गंगा दशहरा (Ganga Dussehra)", type: "hindu", isGovt: false },
+                    { day: 15, title: "निर्जला एकादशी (भीमसेनी एकादशी)", type: "hindu", isGovt: false },
+                    { day: 15, title: "ईद-उल-अज़हा / बकरीद (Bakrid)", type: "muslim", isGovt: true },
+                    { day: 19, title: "ज्येष्ठ पूर्णिमा / कबीर जयंती", type: "hindu", isGovt: false },
+                    { day: 21, title: "अंतर्राष्ट्रीय योग दिवस", type: "govt", isGovt: false },
+                    { day: 30, title: "योगिनी एकादशी", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "साहस और पराक्रम से कार्य बनेंगे। छोटी यात्राओं से व्यापारिक लाभ प्राप्त होगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "धन लाभ के प्रबल योग हैं। परिवार में किसी मांगलिक आयोजन की चर्चा होगी।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "सूर्य के आपकी राशि में गोचर से आत्मबल बढ़ेगा। रुके हुए कार्यों में गति आएगी।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "अनावश्यक भागदौड़ और खर्च से बचें। विदेश से जुड़े कार्यों में सफलता मिलेगी।", lucky: "दूधिया • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "आय के नए मार्ग प्रशस्त होंगे। मित्रों एवं वरिष्ठों का भरपूर सहयोग मिलेगा।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "करियर में नई ऊंचाइयों को छुएंगे। सरकारी क्षेत्र से जुड़े जातकों को विशेष लाभ।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "धार्मिक व आध्यात्मिक कार्यों में मन लगेगा। भाग्य का सहयोग प्राप्त होगा।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "स्वास्थ्य का विशेष ध्यान रखें। पैतृक संपत्ति से जुड़ा कोई मामला सुलझ सकता है।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "दाम्पत्य जीवन सुखमय रहेगा। व्यापार में नए साझेदार जुड़ने से लाभ होगा।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "कार्यक्षेत्र में आपकी मेहनत रंग लाएगी। विरोधियों पर विजय प्राप्त करेंगे।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "विद्यार्थियों को प्रतियोगिता में सफलता मिलेगी। रचनात्मक कार्यों से लाभ होगा।", lucky: "नीला • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "पारिवारिक सुख-शांति में वृद्धि होगी। वाहन या गृह सज्जा पर खर्च संभव है।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 6: JULY 2027 (Starts Thursday, 31 days)
+                hindiMasa: "आषाढ़ - श्रावण",
+                vikramSamvat: "विक्रम संवत २०८४",
+                shakaSamvat: "शक संवत १९४९ • दक्षिणायन",
+                ritu: "वर्षा ऋतु",
+                hijriYear: "हिजरी सन् १४४९",
+                hijriMonths: "मुहर्रम - सफ़र १४४९ हि.",
+                startTithiIndex: 27, // Ashadha Krishna Trayodashi -> Amavasya July 4 -> Devshayani July 14 -> Guru Purnima July 18
+                lunarMonth1: "आषाढ़",
+                lunarMonth2: "श्रावण",
+                monthSwitchDay: 18,
+                hijriStartDay: 26, // 26 Dhul Hijjah -> Muharram 1449 starts July 6, Ashura July 15
+                hijriM1: "ज़िलहिज्जा",
+                hijriM2: "मुहर्रम १४४९",
+                hijriDaysInM1: 30,
+                sunrise: "05:33 AM",
+                sunset: "07:18 PM",
+                jyotish: {
+                    vivah: "2, 3, 7, 8, 9, 12, 13 जुलाई (14 जुलाई से चातुर्मास प्रारंभ - विवाह स्थगित)",
+                    grihaPravesh: "3, 8, 9, 12 जुलाई",
+                    vahan: "2, 7, 11, 16, 21, 25, 30 जुलाई",
+                    panchak: "20 जुलाई (प्रातः 04:10) से 24 जुलाई (सायं 05:30)",
+                    grahan: "18 जुलाई को उपच्छाया चन्द्र ग्रहण (आंशिक दृश्यता)।",
+                    vishesh: "14 जुलाई (देवशयनी एकादशी) से चातुर्मास प्रारंभ। 19 जुलाई से पवित्र श्रावण मास शुरू।"
+                },
+                festivals: [
+                    { day: 4, title: "आषाढ़ अमावस्या (हलहारिणी अमावस्या)", type: "hindu", isGovt: false },
+                    { day: 6, title: "जगन्नाथ रथ यात्रा / इस्लामी नववर्ष मुहर्रम 1", type: "hindu", isGovt: false },
+                    { day: 14, title: "देवशयनी एकादशी (चातुर्मास प्रारंभ)", type: "hindu", isGovt: false },
+                    { day: 15, title: "यौम-ए-आशूरा / मुहर्रम (Muharram)", type: "muslim", isGovt: true },
+                    { day: 18, title: "गुरु पूर्णिमा / व्यास पूर्णिमा", type: "hindu", isGovt: false },
+                    { day: 19, title: "श्रावण मास प्रारंभ (पहला सावन सोमवार)", type: "hindu", isGovt: false },
+                    { day: 29, title: "कामिका एकादशी", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "पारिवारिक सुख बढ़ेगा। माता-पिता के आशीर्वाद से नए कार्यों में सफलता मिलेगी।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "आत्मविश्वास में वृद्धि होगी। भाई-बहनों के साथ संबंध मधुर होंगे, यात्रा लाभप्रद।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "धन संचय के उत्तम अवसर प्राप्त होंगे। वाणी के प्रभाव से कार्य सिद्ध होंगे।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "सूर्य के आपकी राशि में आने से मान-सम्मान बढ़ेगा। स्वास्थ्य उत्तम रहेगा।", lucky: "सफ़ेद • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "व्यय की अधिकता रह सकती है। आध्यात्मिक कार्यों व शिव आराधना से शांति मिलेगी।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "आर्थिक लाभ के प्रबल योग हैं। रुका हुआ पैसा वापस मिलने से मन प्रसन्न रहेगा।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "कार्यक्षेत्र में नई जिम्मेदारियां मिलेंगी। व्यापारिक विस्तार की योजना सफल होगी।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "भाग्य का भरपूर साथ मिलेगा। धार्मिक यात्रा एवं तीर्थ दर्शन का सौभाग्य प्राप्त होगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "स्वास्थ्य के प्रति सचेत रहें। वाहन सावधानी से चलाएं, माह के अंत में राहत मिलेगी।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "व्यापार में अच्छा मुनाफा होगा। जीवनसाथी के सहयोग से पारिवारिक उलझनें सुलझेंगी।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "नौकरी में पदोन्नति के संकेत हैं। शत्रुओं पर विजय प्राप्त होगी।", lucky: "नीला • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "संतान पक्ष से शुभ समाचार मिलेगा। विद्यार्थियों के लिए समय अत्यंत फलदायी है।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 7: AUGUST 2027 (Starts Sunday, 31 days)
+                hindiMasa: "श्रावण - भाद्रपद",
+                vikramSamvat: "विक्रम संवत २०८४",
+                shakaSamvat: "शक संवत १९४९ • दक्षिणायन",
+                ritu: "वर्षा ऋतु",
+                hijriYear: "हिजरी सन् १४४९",
+                hijriMonths: "सफ़र - रबी-उल-अव्वल १४४९ हि.",
+                startTithiIndex: 28, // Shravana Krishna Chaturdashi -> Amavasya Aug 2 -> Hariyali Teej Aug 5 -> Raksha Bandhan Aug 17 -> Janmashtami Aug 25
+                lunarMonth1: "श्रावण",
+                lunarMonth2: "भाद्रपद",
+                monthSwitchDay: 17,
+                hijriStartDay: 27, // 27 Muharram -> Safar starts Aug 5
+                hijriM1: "मुहर्रम",
+                hijriM2: "सफ़र",
+                hijriDaysInM1: 30,
+                sunrise: "05:49 AM",
+                sunset: "06:59 PM",
+                jyotish: {
+                    vivah: "चातुर्मास के कारण विवाह मुहूर्त वर्जित हैं।",
+                    grihaPravesh: "चातुर्मास के कारण शुभ मुहूर्त नहीं हैं।",
+                    vahan: "4, 8, 13, 18, 22, 27 अगस्त",
+                    panchak: "16 अगस्त (प्रातः 11:20) से 20 अगस्त (रात्रि 11:55)",
+                    grahan: "2 अगस्त को पूर्ण सूर्य ग्रहण (भारत में अदृश्य)।",
+                    vishesh: "17 अगस्त को रक्षा बंधन एवं 25 अगस्त को श्रीकृष्ण जन्माष्टमी का महापर्व।"
+                },
+                festivals: [
+                    { day: 2, title: "हरियाली अमावस्या (श्रावण अमावस्या)", type: "hindu", isGovt: false },
+                    { day: 5, title: "हरियाली तीज (Hariyali Teej)", type: "hindu", isGovt: false },
+                    { day: 7, title: "नाग पंचमी (Nag Panchami)", type: "hindu", isGovt: false },
+                    { day: 13, title: "श्रावण पुत्रदा एकादशी", type: "hindu", isGovt: false },
+                    { day: 15, title: "स्वतंत्रता दिवस (Independence Day)", type: "govt", isGovt: true },
+                    { day: 17, title: "रक्षा बंधन / श्रावण पूर्णिमा", type: "hindu", isGovt: true },
+                    { day: 20, title: "कजरी तीज (Kajri Teej)", type: "hindu", isGovt: false },
+                    { day: 25, title: "श्रीकृष्ण जन्माष्टमी (Janmashtami)", type: "hindu", isGovt: true },
+                    { day: 28, title: "अजा एकादशी", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "संतान की उन्नति से प्रसन्नता मिलेगी। प्रेम संबंधों में मधुरता आएगी, आकस्मिक धन लाभ।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "पारिवारिक सुख-सुविधाओं में वृद्धि होगी। माता के स्वास्थ्य में सुधार देखने को मिलेगा।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "पराक्रम और उत्साह से भरे रहेंगे। रुके हुए कार्यों में मित्रों का सहयोग मिलेगा।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "आर्थिक पक्ष मजबूत होगा। परिवार में उत्सव का माहौल रहेगा, वाणी पर संयम रखें।", lucky: "दूधिया • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "सूर्य के स्वराशि में प्रवेश से मान-सम्मान और आत्मविश्वास चरम पर रहेगा।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "खर्चों की अधिकता रह सकती है। लंबी यात्रा का योग बनेगा, स्वास्थ्य का ध्यान रखें।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "आय के नए स्रोत बनेंगे। व्यापार में बड़ा लाभ होने से आर्थिक स्थिति सुधरेगी।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "कार्यक्षेत्र में उच्च पद व प्रतिष्ठा प्राप्त होगी। सरकारी कार्यों में सफलता मिलेगी।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "भाग्य का साथ मिलेगा। धार्मिक अनुष्ठान व गुरुजनों के आशीर्वाद से कार्य बनेंगे।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "स्वास्थ्य के प्रति लापरवाही न बरतें। गुप्त शत्रुओं से सतर्क रहें, धैर्य से काम लें।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "दाम्पत्य जीवन में प्रेम बढ़ेगा। साझेदारी के व्यवसाय में लाभ के संकेत हैं।", lucky: "नीला • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "प्रतियोगी परीक्षाओं में सफलता मिलेगी। पुराने रोगों से मुक्ति व स्वास्थ्य लाभ होगा।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 8: SEPTEMBER 2027 (Starts Wednesday, 30 days)
+                hindiMasa: "भाद्रपद - आश्विन",
+                vikramSamvat: "विक्रम संवत २०८४",
+                shakaSamvat: "शक संवत १९४९ • दक्षिणायन",
+                ritu: "शरद ऋतु",
+                hijriYear: "हिजरी सन् १४४९",
+                hijriMonths: "रबी-उल-अव्वल - रबी-उस-सानी १४४९ हि.",
+                startTithiIndex: 0, // Bhadrapada Shukla Pratipada -> Hartalika Teej Sep 3 -> Ganesh Chaturthi Sep 4 -> Pitru Paksha starts Sep 16 -> Navratri starts Sep 30
+                lunarMonth1: "भाद्रपद",
+                lunarMonth2: "आश्विन",
+                monthSwitchDay: 15,
+                hijriStartDay: 29, // 29 Safar -> Rabi-ul-Awwal starts Sep 3, Eid-e-Milad Sep 14
+                hijriM1: "सफ़र",
+                hijriM2: "रबी-उल-अव्वल",
+                hijriDaysInM1: 29,
+                sunrise: "06:04 AM",
+                sunset: "06:28 PM",
+                jyotish: {
+                    vivah: "चातुर्मास के कारण विवाह मुहूर्त वर्जित हैं।",
+                    grihaPravesh: "चातुर्मास के कारण शुभ मुहूर्त नहीं हैं।",
+                    vahan: "4, 6, 10, 13, 30 सितम्बर (16 से 29 पितृपक्ष)",
+                    panchak: "12 सितम्बर (सायं 06:30) से 17 सितम्बर (प्रातः 07:10)",
+                    grahan: "इस माह कोई ग्रहण नहीं है।",
+                    vishesh: "4 सितम्बर से गणेशोत्सव। 16 से 29 सितम्बर पितृपक्ष (श्राद्ध)। 30 सितम्बर से शारदीय नवरात्रि प्रारंभ।"
+                },
+                festivals: [
+                    { day: 3, title: "हरतालिका तीज (Hartalika Teej)", type: "hindu", isGovt: false },
+                    { day: 4, title: "श्री गणेश चतुर्थी (Ganesh Chaturthi)", type: "hindu", isGovt: true },
+                    { day: 5, title: "शिक्षक दिवस (Teachers' Day)", type: "other", isGovt: false },
+                    { day: 11, title: "परिवर्तिनी एकादशी", type: "hindu", isGovt: false },
+                    { day: 14, title: "ईद-ए-मिलाद / मिलाद-उन-नबी", type: "muslim", isGovt: true },
+                    { day: 14, title: "अनंत चतुर्दशी / गणेश विसर्जन", type: "hindu", isGovt: false },
+                    { day: 15, title: "भाद्रपद पूर्णिमा / श्राद्ध प्रारंभ", type: "hindu", isGovt: false },
+                    { day: 26, title: "इन्दिरा एकादशी", type: "hindu", isGovt: false },
+                    { day: 29, title: "सर्वपितृ अमावस्या (महालय अमावस्या)", type: "hindu", isGovt: false },
+                    { day: 30, title: "शारदीय नवरात्रि प्रारंभ / घटस्थापना", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "शत्रुओं पर विजय मिलेगी। रुके हुए कार्यों में गति आएगी, स्वास्थ्य में सुधार होगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "शिक्षा और संतान पक्ष से शुभ समाचार। रचनात्मक कार्यों से मान-सम्मान मिलेगा।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "भूमि-भवन से जुड़े कार्यों में लाभ होगा। परिवार के साथ सुखद समय व्यतीत करेंगे।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "आत्मविश्वास बढ़ेगा। भाई-बहनों के सहयोग से व्यापार में नया विस्तार संभव है।", lucky: "दूधिया • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "आर्थिक स्थिति में सुधार होगा। पैतृक संपत्ति से लाभ मिलने के प्रबल योग हैं।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "सूर्य के आपकी राशि में आगमन से तेज बढ़ेगा। नए अवसर प्राप्त होंगे।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "अनावश्यक खर्चों पर नियंत्रण रखें। विदेश यात्रा या दूर स्थान से लाभ के योग।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "आय में वृद्धि होगी। मित्रों व बड़े भाई के सहयोग से महत्वपूर्ण योजना पूरी होगी।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "कार्यक्षेत्र में पदोन्नति के योग हैं। उच्चाधिकारियों से प्रशंसा प्राप्त होगी।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "भाग्य का साथ मिलेगा। धार्मिक व मांगलिक कार्यों में रुचि बढ़ेगी।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "स्वास्थ्य के प्रति सजग रहें। वाहन सावधानी से चलाएं, धैर्य से निर्णय लें।", lucky: "नीला • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "व्यापार में अच्छा मुनाफा होगा। जीवनसाथी के साथ संबंधों में मधुरता आएगी।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 9: OCTOBER 2027 (Starts Friday, 31 days)
+                hindiMasa: "आश्विन - कार्तिक",
+                vikramSamvat: "विक्रम संवत २०८४",
+                shakaSamvat: "शक संवत १९४९ • दक्षिणायन",
+                ritu: "शरद ऋतु",
+                hijriYear: "हिजरी सन् १४४९",
+                hijriMonths: "रबी-उस-सानी - जमादी-उल-अव्वल १४४९ हि.",
+                startTithiIndex: 1, // Ashwin Shukla Dwitiya -> Durga Ashtami Oct 7 -> Dussehra Oct 9 -> Karwa Chauth Oct 18 -> Dhanteras Oct 27 -> Diwali Oct 29
+                lunarMonth1: "आश्विन",
+                lunarMonth2: "कार्तिक",
+                monthSwitchDay: 15,
+                hijriStartDay: 29, // 29 Rabi-ul-Awwal -> Rabi-us-Sani starts Oct 3
+                hijriM1: "रबी-उल-अव्वल",
+                hijriM2: "रबी-उस-सानी",
+                hijriDaysInM1: 30,
+                sunrise: "06:19 AM",
+                sunset: "05:54 PM",
+                jyotish: {
+                    vivah: "चातुर्मास के कारण विवाह मुहूर्त वर्जित हैं (नवम्बर में प्रारंभ)।",
+                    grihaPravesh: "7, 9, 15, 27 अक्टूबर (नवरात्रि व धनतेरस विशेष)",
+                    vahan: "3, 7, 9, 15, 20, 27 अक्टूबर",
+                    panchak: "10 अक्टूबर (प्रातः 01:40) से 14 अक्टूबर (दोपहर 02:15)",
+                    grahan: "इस माह कोई ग्रहण नहीं है।",
+                    vishesh: "9 अक्टूबर को विजयादशमी (दशहरा) तथा 29 अक्टूबर को महालक्ष्मी पूजन (दीपावली) का महापर्व।"
+                },
+                festivals: [
+                    { day: 2, title: "गांधी जयंती (Gandhi Jayanti)", type: "govt", isGovt: true },
+                    { day: 7, title: "दुर्गा अष्टमी (महाष्टमी)", type: "hindu", isGovt: false },
+                    { day: 8, title: "महानवमी (शारदीय नवरात्रि समापन)", type: "hindu", isGovt: false },
+                    { day: 9, title: "विजयादशमी / दशहरा (Dussehra)", type: "hindu", isGovt: true },
+                    { day: 11, title: "पापांकुशा एकादशी", type: "hindu", isGovt: false },
+                    { day: 14, title: "शरद पूर्णिमा / कोजागरी व्रत", type: "hindu", isGovt: false },
+                    { day: 15, title: "महर्षि वाल्मीकि जयंती", type: "hindu", isGovt: true },
+                    { day: 18, title: "करवा चौथ (Karwa Chauth)", type: "hindu", isGovt: false },
+                    { day: 25, title: "रमा एकादशी / गोवत्स द्वादशी", type: "hindu", isGovt: false },
+                    { day: 27, title: "धनतेरस (धन्वंतरि जयंती)", type: "hindu", isGovt: false },
+                    { day: 28, title: "नरक चतुर्दशी / छोटी दिवाली", type: "hindu", isGovt: false },
+                    { day: 29, title: "दीपावली / महालक्ष्मी पूजन (Diwali)", type: "hindu", isGovt: true },
+                    { day: 30, title: "गोवर्धन पूजा / अन्नकूट", type: "hindu", isGovt: true },
+                    { day: 31, title: "भाई दूज / चित्रगुप्त पूजा", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "व्यापार में उत्तम लाभ व विस्तार होगा। दाम्पत्य जीवन में प्रेम व सामंजस्य बढ़ेगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "आर्थिक पक्ष मजबूत रहेगा। दीपावली पर घर में सुख-समृद्धि व नए वाहनों का आगमन संभव।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "संतान की उन्नति से मन प्रसन्न रहेगा। बुद्धि कौशल से हर क्षेत्र में सफलता पाएंगे।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "पारिवारिक उत्सवों में व्यस्त रहेंगे। माता के आशीर्वाद से संपत्ति लाभ के योग।", lucky: "दूधिया • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "पराक्रम और आत्मविश्वास बढ़ेगा। भाई-बहनों के साथ संबंधों में प्रगाढ़ता आएगी।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "धन आगमन के प्रबल योग हैं। परिवार में मांगलिक कार्यों से खुशहाली रहेगी।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "मान-सम्मान व यश में वृद्धि होगी। नए वस्त्र, आभूषण एवं सुख-साधनों की प्राप्ति होगी।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "त्योहारों पर शुभ कार्यों में धन व्यय होगा। विदेश से जुड़े कार्यों में सफलता मिलेगी।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "आय में जबरदस्त बढ़ोतरी होगी। रुकी हुई योजनाएं पुनः प्रारंभ होकर लाभ देंगी।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "कार्यक्षेत्र में आपकी प्रतिष्ठा बढ़ेगी। व्यापार में अप्रत्याशित मुनाफा होने के संकेत।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "भाग्य का भरपूर सहयोग मिलेगा। धार्मिक यात्रा और आध्यात्मिक उन्नति होगी।", lucky: "नीला • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "स्वास्थ्य का ध्यान रखें। परिवार के बड़ों की सलाह से निवेश करना लाभदायक रहेगा।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 10: NOVEMBER 2027 (Starts Monday, 30 days)
+                hindiMasa: "कार्तिक - मार्गशीर्ष",
+                vikramSamvat: "विक्रम संवत २०८४",
+                shakaSamvat: "शक संवत १९४९ • दक्षिणायन",
+                ritu: "हेमंत ऋतु",
+                hijriYear: "हिजरी सन् १४४९",
+                hijriMonths: "जमादी-उल-अव्वल - जमादी-उस-सानी १४४९ हि.",
+                startTithiIndex: 3, // Kartika Shukla Chaturthi -> Chhath Puja Nov 4 -> Devutthana Ekadashi Nov 9 -> Guru Nanak Jayanti Nov 13
+                lunarMonth1: "कार्तिक",
+                lunarMonth2: "मार्गशीर्ष",
+                monthSwitchDay: 14,
+                hijriStartDay: 1, // 1 Jumada al-Awwal
+                hijriM1: "जमादी-उल-अव्वल",
+                hijriM2: "जमादी-उस-सानी",
+                hijriDaysInM1: 30,
+                sunrise: "06:39 AM",
+                sunset: "05:30 PM",
+                jyotish: {
+                    vivah: "11, 12, 14, 15, 20, 21, 24, 25, 29, 30 नवम्बर (9 नवम्बर से विवाह शुरू)",
+                    grihaPravesh: "11, 14, 15, 20, 25, 29 नवम्बर",
+                    vahan: "5, 10, 14, 19, 24, 28 नवम्बर",
+                    panchak: "6 नवम्बर (प्रातः 08:15) से 10 नवम्बर (रात्रि 09:05)",
+                    grahan: "इस माह कोई ग्रहण नहीं है।",
+                    vishesh: "9 नवम्बर को देवउठनी एकादशी (चातुर्मास समाप्त) एवं सभी मांगलिक कार्य प्रारंभ।"
+                },
+                festivals: [
+                    { day: 4, title: "छठ पूजा (सूर्य षष्ठी महापर्व)", type: "hindu", isGovt: true },
+                    { day: 9, title: "देवउठनी एकादशी / तुलसी विवाह", type: "hindu", isGovt: false },
+                    { day: 13, title: "कार्तिक पूर्णिमा / गुरु नानक जयंती / देव दीपावली", type: "other", isGovt: true },
+                    { day: 14, title: "बाल दिवस (Children's Day)", type: "other", isGovt: false },
+                    { day: 24, title: "उत्पन्ना एकादशी", type: "hindu", isGovt: false },
+                    { day: 27, title: "मार्गशीर्ष अमावस्या", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "आर्थिक लाभ के नए अवसर मिलेंगे। रुके हुए सरकारी कार्य पूरे होने से राहत मिलेगी।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "व्यापार में विस्तार होगा। जीवनसाथी के साथ संबंध मधुर रहेंगे, मांगलिक कार्य संभव।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "कार्यक्षेत्र में मेहनत का पूरा फल मिलेगा। विरोधियों पर विजय प्राप्त होगी।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "संतान पक्ष से सुखद समाचार मिलेगा। विद्यार्थियों के लिए यह माह अत्यंत शुभ है।", lucky: "सफ़ेद • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "भूमि-भवन व वाहन सुख में वृद्धि होगी। पारिवारिक वातावरण आनंदमय रहेगा।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "आत्मविश्वास व पराक्रम बढ़ेगा। छोटी यात्राएं व्यापारिक दृष्टि से लाभदायक रहेंगी।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "धन संचय में सफलता मिलेगी। परिवार में किसी शुभ आयोजन की रूपरेखा बनेगी।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "सूर्य के आपकी राशि में प्रवेश से मान-सम्मान बढ़ेगा। स्वास्थ्य उत्तम रहेगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "खर्चों पर नियंत्रण रखें। विदेश यात्रा या लंबी दूरी की यात्रा का योग बनेगा।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "आय के नए स्रोत खुलेंगे। मित्रों के सहयोग से रुके हुए कार्य संपन्न होंगे।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "नौकरी में पदोन्नति व मान-सम्मान प्राप्त होगा। व्यापार में अच्छा लाभ होगा।", lucky: "नीला • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "भाग्य का साथ मिलेगा। धार्मिक यात्रा एवं गुरुजनों के आशीर्वाद से कार्य बनेंगे।", lucky: "पीला • अंक 3" }
+                ]
+            },
+            {
+                // 11: DECEMBER 2027 (Starts Wednesday, 31 days)
+                hindiMasa: "मार्गशीर्ष - पौष",
+                vikramSamvat: "विक्रम संवत २०८४",
+                shakaSamvat: "शक संवत १९४९ • दक्षिणायन",
+                ritu: "हेमंत - शिशिर ऋतु",
+                hijriYear: "हिजरी सन् १४४९",
+                hijriMonths: "जमादी-उस-सानी - रजब १४४९ हि.",
+                startTithiIndex: 4, // Margashirsha Shukla Panchami -> Gita Jayanti Dec 9 -> Kharmas Dec 16 -> Christmas Dec 25
+                lunarMonth1: "मार्गशीर्ष",
+                lunarMonth2: "पौष",
+                monthSwitchDay: 13,
+                hijriStartDay: 1, // 1 Jumada al-Thani
+                hijriM1: "जमादी-उस-सानी",
+                hijriM2: "रजब",
+                hijriDaysInM1: 29,
+                sunrise: "07:03 AM",
+                sunset: "05:27 PM",
+                jyotish: {
+                    vivah: "1, 2, 3, 4, 8, 9, 10, 11, 14 दिसम्बर (16 दिसम्बर से खरमास प्रारंभ)",
+                    grihaPravesh: "2, 4, 9, 10, 14 दिसम्बर",
+                    vahan: "3, 8, 10, 15, 22, 27, 31 दिसम्बर",
+                    panchak: "3 दिसम्बर से 8 दिसम्बर तक एवं 30 दिसम्बर से प्रारंभ",
+                    grahan: "इस माह कोई ग्रहण नहीं है।",
+                    vishesh: "9 दिसम्बर को मोक्षदा एकादशी एवं श्रीमद्भगवद्गीता जयंती। 16 दिसम्बर से धनु खरमास प्रारंभ।"
+                },
+                festivals: [
+                    { day: 3, title: "विवाह पंचमी (श्री राम-सीता विवाह उत्सव)", type: "hindu", isGovt: false },
+                    { day: 9, title: "मोक्षदा एकादशी / गीता जयंती", type: "hindu", isGovt: false },
+                    { day: 13, title: "मार्गशीर्ष पूर्णिमा / दत्तात्रेय जयंती", type: "hindu", isGovt: false },
+                    { day: 16, title: "धनु संक्रांति (खरमास प्रारंभ)", type: "hindu", isGovt: false },
+                    { day: 24, title: "सफला एकादशी", type: "hindu", isGovt: false },
+                    { day: 25, title: "क्रिसमस डे (Christmas Day)", type: "other", isGovt: true },
+                    { day: 27, title: "पौष अमावस्या", type: "hindu", isGovt: false }
+                ],
+                rashifal: [
+                    { rashi: "मेष (Aries)", icon: "♈", text: "वर्ष के अंतिम माह में भाग्य का साथ मिलेगा। धार्मिक यात्रा व शुभ समाचार प्राप्त होंगे।", lucky: "लाल • अंक 9" },
+                    { rashi: "वृषभ (Taurus)", icon: "♉", text: "स्वास्थ्य का ध्यान रखें। गुप्त निवेश से लाभ होगा, पारिवारिक सहयोग बना रहेगा।", lucky: "सफ़ेद • अंक 6" },
+                    { rashi: "मिथुन (Gemini)", icon: "♊", text: "व्यापार में नए अवसर मिलेंगे। जीवनसाथी के साथ सुखद यात्रा का योग बनेगा।", lucky: "हरा • अंक 5" },
+                    { rashi: "कर्क (Cancer)", icon: "♋", text: "कार्यक्षेत्र में आपकी मेहनत की सराहना होगी। पुराने विवाद सुलझने से मन शांत रहेगा।", lucky: "दूधिया • अंक 2" },
+                    { rashi: "सिंह (Leo)", icon: "♌", text: "संतान की सफलता से गौरव महसूस करेंगे। विद्यार्थियों को प्रतियोगिता में शुभ परिणाम।", lucky: "सुनहरा • अंक 1" },
+                    { rashi: "कन्या (Virgo)", icon: "♍", text: "घर-परिवार में सुख-शांति रहेगी। वाहन या गृह सज्जा पर शुभ खर्च होगा।", lucky: "हरा • अंक 5" },
+                    { rashi: "तुला (Libra)", icon: "♎", text: "पराक्रम और आत्मविश्वास में वृद्धि होगी। मित्रों के सहयोग से नए कार्य बनेंगे।", lucky: "गुलाबी • अंक 6" },
+                    { rashi: "वृश्चिक (Scorpio)", icon: "♏", text: "आर्थिक स्थिति सुदृढ़ होगी। रुका हुआ धन वापस मिलने से वर्ष का सुखद समापन होगा।", lucky: "लाल • अंक 9" },
+                    { rashi: "धनु (Sagittarius)", icon: "♐", text: "सूर्य के आपकी राशि में प्रवेश से मान-प्रतिष्ठा बढ़ेगी। नए संकल्प पूरे होंगे।", lucky: "पीला • अंक 3" },
+                    { rashi: "मकर (Capricorn)", icon: "♑", text: "अनावश्यक खर्चों पर नियंत्रण रखें। आध्यात्मिक चिंतन और दान-पुण्य से लाभ होगा।", lucky: "नीला • अंक 8" },
+                    { rashi: "कुंभ (Aquarius)", icon: "♒", text: "आय के नए स्रोत खुलेंगे। बड़े भाई-बहनों का सहयोग और मार्गदर्शन प्राप्त होगा।", lucky: "नीला • अंक 8" },
+                    { rashi: "मीन (Pisces)", icon: "♓", text: "करियर में नई ऊंचाइयों को छुएंगे। उच्चाधिकारियों के सहयोग से पदोन्नति के योग।", lucky: "पीला • अंक 3" }
+                ]
+            }
+        ];
+
+        // 30 Lunar Tithis (0..14 Shukla Paksha, 15..29 Krishna Paksha)
+        const TITHI_CYCLE = [
+            { paksha: "शुक्ल", short: "शु. १", name: "प्रतिपदा", special: "" },
+            { paksha: "शुक्ल", short: "शु. २", name: "द्वितीया", special: "" },
+            { paksha: "शुक्ल", short: "शु. ३", name: "तृतीया", special: "" },
+            { paksha: "शुक्ल", short: "शु. ४", name: "चतुर्थी", special: "विनायक चतुर्थी" },
+            { paksha: "शुक्ल", short: "शु. ५", name: "पंचमी", special: "" },
+            { paksha: "शुक्ल", short: "शु. ६", name: "षष्ठी", special: "" },
+            { paksha: "शुक्ल", short: "शु. ७", name: "सप्तमी", special: "" },
+            { paksha: "शुक्ल", short: "शु. ८", name: "अष्टमी", special: "दुर्गाष्टमी" },
+            { paksha: "शुक्ल", short: "शु. ९", name: "नवमी", special: "" },
+            { paksha: "शुक्ल", short: "शु. १०", name: "दशमी", special: "" },
+            { paksha: "शुक्ल", short: "शु. ११", name: "एकादशी", special: "एकादशी व्रत" },
+            { paksha: "शुक्ल", short: "शु. १२", name: "द्वादशी", special: "" },
+            { paksha: "शुक्ल", short: "शु. १३", name: "त्रयोदशी", special: "प्रदोष व्रत" },
+            { paksha: "शुक्ल", short: "शु. १४", name: "चतुर्दशी", special: "" },
+            { paksha: "शुक्ल", short: "पूर्णिमा", name: "पूर्णिमा", special: "पूर्णिमा व्रत" },
+            { paksha: "कृष्ण", short: "कृ. १", name: "प्रतिपदा", special: "" },
+            { paksha: "कृष्ण", short: "कृ. २", name: "द्वितीया", special: "" },
+            { paksha: "कृष्ण", short: "कृ. ३", name: "तृतीया", special: "" },
+            { paksha: "कृष्ण", short: "कृ. ४", name: "चतुर्थी", special: "संकष्टी चतुर्थी" },
+            { paksha: "कृष्ण", short: "कृ. ५", name: "पंचमी", special: "" },
+            { paksha: "कृष्ण", short: "कृ. ६", name: "षष्ठी", special: "" },
+            { paksha: "कृष्ण", short: "कृ. ७", name: "सप्तमी", special: "" },
+            { paksha: "कृष्ण", short: "कृ. ८", name: "अष्टमी", special: "कालाष्टमी" },
+            { paksha: "कृष्ण", short: "कृ. ९", name: "नवमी", special: "" },
+            { paksha: "कृष्ण", short: "कृ. १०", name: "दशमी", special: "" },
+            { paksha: "कृष्ण", short: "कृ. ११", name: "एकादशी", special: "एकादशी व्रत" },
+            { paksha: "कृष्ण", short: "कृ. १२", name: "द्वादशी", special: "" },
+            { paksha: "कृष्ण", short: "कृ. १३", name: "त्रयोदशी", special: "प्रदोष व्रत" },
+            { paksha: "कृष्ण", short: "कृ. १४", name: "चतुर्दशी", special: "मासिक शिवरात्रि" },
+            { paksha: "कृष्ण", short: "अमावस्या", name: "अमावस्या", special: "अमावस्या" }
+        ];
+
+        // State
+        let currentMonth = 0; // 0 = Jan 2027
+        let activeFilter = "all";
+
+        // DOM References
+        const calendarSheet = document.getElementById("calendarSheet");
+        const calendarGrid = document.getElementById("calendarGrid");
+        const monthSelect = document.getElementById("monthSelect");
+        const prevMonthBtn = document.getElementById("prevMonthBtn");
+        const nextMonthBtn = document.getElementById("nextMonthBtn");
+
+        // Helper: Convert English digits to Devanagari digits
+        function toDevanagariDigits(num) {
+            const devDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+            return String(num).replace(/\d/g, d => devDigits[d]);
+        }
+
+        // Helper: Get Religion Badge Colors
+        function getReligionBadgeStyle(type, isGovt) {
+            if (isGovt && type === "govt") {
+                return { bg: "bg-red-700 text-white", icon: "🏛️", label: "राजकीय अवकाश" };
+            }
+            switch (type) {
+                case "hindu":
+                    return { bg: "bg-orange-100 text-orange-950 border border-orange-400", icon: "🕉️", label: "हिन्दू" };
+                case "muslim":
+                    return { bg: "bg-emerald-100 text-emerald-950 border border-emerald-500", icon: "☪️", label: "मुस्लिम" };
+                case "other":
+                    return { bg: "bg-blue-100 text-blue-950 border border-blue-400", icon: "✨", label: "सर्वधर्म" };
+                default:
+                    return { bg: "bg-red-100 text-red-950 border border-red-400", icon: "🏛️", label: "अवकाश" };
+            }
+        }
+
+        // Compute detailed Panchang for a specific day in 2027
+        function getDayPanchang(monthIdx, dayNum) {
+            const mData = CALENDAR_2027[monthIdx];
+            const dateObj = new Date(2027, monthIdx, dayNum);
+            const weekdayIdx = dateObj.getDay();
+
+            // Lunar Tithi calculation (advances ~1.015 tithis per solar day for natural alignment)
+            const tithiOffset = Math.floor((dayNum - 1) * 1.015);
+            const tithiIdx = (mData.startTithiIndex + tithiOffset) % 30;
+            const tithiInfo = TITHI_CYCLE[tithiIdx];
+            const lunarMasa = dayNum <= mData.monthSwitchDay ? mData.lunarMonth1 : mData.lunarMonth2;
+
+            // Vikram Samvat Year transition on April 7, 2027
+            let vsYear = "२०८३";
+            if (monthIdx > 3 || (monthIdx === 3 && dayNum >= 7)) {
+                vsYear = "२०८४";
+            }
+
+            // Hijri Date calculation
+            let hijriDay = mData.hijriStartDay + (dayNum - 1);
+            let hijriMonth = mData.hijriM1;
+            if (hijriDay > mData.hijriDaysInM1) {
+                hijriDay = hijriDay - mData.hijriDaysInM1;
+                hijriMonth = mData.hijriM2;
+            }
+
+            // Hijri Year transition on July 6, 2027 (Muharram 1)
+            let hijriYearNum = "१४४८";
+            if (monthIdx > 6 || (monthIdx === 6 && dayNum >= 6)) {
+                hijriYearNum = "१४४९";
+            }
+
+            // Nakshatra & Yoga deterministic cycle across year
+            const dayOfYear = Math.floor((dateObj - new Date(2027, 0, 1)) / (1000 * 60 * 60 * 24));
+            const nakshatra = NAKSHATRAS[(dayOfYear + 8) % NAKSHATRAS.length];
+            const yoga = YOGAS[(dayOfYear + 14) % YOGAS.length];
+
+            // Matching festivals on this day
+            const dayFestivals = mData.festivals.filter(f => f.day === dayNum);
+            const isGovtHoliday = dayFestivals.some(f => f.isGovt);
+
+            return {
+                dayNum,
+                monthIdx,
+                weekdayIdx,
+                weekdayName: WEEKDAYS_HI[weekdayIdx],
+                tithiIdx,
+                tithiInfo,
+                lunarMasa,
+                vsYear,
+                hijriDay,
+                hijriMonth,
+                hijriYearNum,
+                nakshatra,
+                yoga,
+                rahukaal: RAHUKAAL_BY_DAY[weekdayIdx],
+                sunrise: mData.sunrise,
+                sunset: mData.sunset,
+                dayFestivals,
+                isGovtHoliday
+            };
+        }
+
+        // Main Render Function
+        function renderCalendar(monthIdx) {
+            const mData = CALENDAR_2027[monthIdx];
+
+            // Trigger subtle page animation
+            calendarSheet.classList.remove("page-animate");
+            void calendarSheet.offsetWidth;
+            calendarSheet.classList.add("page-animate");
+
+            // Update Select & Headers
+            monthSelect.value = monthIdx;
+            document.getElementById("monthNumberBadge").textContent = toDevanagariDigits(String(monthIdx + 1).padStart(2, "0"));
+            document.getElementById("currentMonthHindi").textContent = `${HINDI_MONTHS_NAME[monthIdx]} २०२७`;
+            document.getElementById("currentMonthEng").textContent = `${HINDI_MONTHS_ENG[monthIdx]} 2027`;
+            document.getElementById("vikramSamvatHeader").textContent = mData.vikramSamvat;
+            document.getElementById("shakaSamvatHeader").textContent = mData.shakaSamvat;
+            document.getElementById("hijriYearHeader").textContent = mData.hijriYear;
+            document.getElementById("hijriMonthsHeader").textContent = mData.hijriMonths;
+            document.getElementById("hindiMasaBadge").textContent = `${mData.hindiMasa} (${mData.vikramSamvat})`;
+            document.getElementById("rituBadge").textContent = mData.ritu;
+            document.getElementById("rashifalMonthSubtitle").textContent = `${HINDI_MONTHS_NAME[monthIdx]} 2027 — सभी १२ राशियों का फल`;
+
+            // Calculate Grid Geometry
+            const firstDayOfWeek = new Date(2027, monthIdx, 1).getDay(); // 0=Sun..6=Sat
+            const totalDaysInMonth = new Date(2027, monthIdx + 1, 0).getDate();
+            const totalCells = Math.ceil((firstDayOfWeek + totalDaysInMonth) / 7) * 7;
+
+            calendarGrid.innerHTML = "";
+
+            for (let cellIdx = 0; cellIdx < totalCells; cellIdx++) {
+                const dayNum = cellIdx - firstDayOfWeek + 1;
+
+                // Empty leading/trailing decorative cell
+                if (dayNum < 1 || dayNum > totalDaysInMonth) {
+                    const emptyCell = document.createElement("div");
+                    emptyCell.className = "min-h-[96px] sm:min-h-[115px] bg-amber-950/5 p-1.5 flex items-center justify-center";
+                    emptyCell.innerHTML = `<span class="text-amber-800/20 text-lg select-none">卐</span>`;
+                    calendarGrid.appendChild(emptyCell);
+                    continue;
+                }
+
+                const p = getDayPanchang(monthIdx, dayNum);
+                const isSunday = p.weekdayIdx === 0;
+                const isRedDay = isSunday || p.isGovtHoliday;
+
+                // Filter festival display based on activeFilter
+                const visibleFestivals = p.dayFestivals.filter(f => {
+                    if (activeFilter === "all") return true;
+                    if (activeFilter === "govt") return f.isGovt;
+                    return f.type === activeFilter;
+                });
+
+                // Moon Phase Icon for Purnima (14) & Amavasya (29)
+                let moonBadge = "";
+                if (p.tithiIdx === 14) {
+                    moonBadge = `<span title="पूर्णिमा" class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-700 inline-block shadow-xs"></span>`;
+                } else if (p.tithiIdx === 29) {
+                    moonBadge = `<span title="अमावस्या" class="w-3.5 h-3.5 rounded-full bg-stone-900 border border-stone-600 inline-block shadow-xs"></span>`;
+                }
+
+                // Cell Container
+                const cell = document.createElement("div");
+                cell.className = `date-cell min-h-[98px] sm:min-h-[118px] p-1.5 sm:p-2 flex flex-col justify-between cursor-pointer relative ${
+                    p.isGovtHoliday ? "holiday-cell" : isSunday ? "sunday-cell" : ""
+                }`;
+
+                // Top Row: Vikram Tithi + Moon Icon & Hijri Date
+                const topRow = `
+                    <div class="flex items-start justify-between gap-1 text-[10px] sm:text-[11px] leading-tight">
+                        <span class="font-bold text-stone-700 truncate" title="${p.lunarMasa} ${p.tithiInfo.paksha} ${p.tithiInfo.name}">
+                            ${p.tithiInfo.short}
+                        </span>
+                        <div class="flex items-center gap-1 shrink-0">
+                            ${moonBadge}
+                            <span class="font-bold text-emerald-800 bg-emerald-50/90 px-1 rounded border border-emerald-300/60" title="हिजरी: ${p.hijriDay} ${p.hijriMonth}">
+                                ${toDevanagariDigits(p.hijriDay)} हि.
+                            </span>
+                        </div>
+                    </div>
+                `;
+
+                // Middle Row: Big Gregorian Date + Govt Holiday Tag
+                const middleRow = `
+                    <div class="my-0.5 flex items-baseline justify-between">
+                        <span class="font-eng text-2xl sm:text-3xl md:text-4xl font-extrabold leading-none tracking-tight ${
+                            isRedDay ? "text-red-700" : "text-stone-900"
+                        }">
+                            ${dayNum}
+                        </span>
+                        ${p.isGovtHoliday ? `<span class="text-[9px] sm:text-[10px] font-extrabold bg-red-700 text-white px-1.5 py-0.5 rounded shadow-xs">अवकाश</span>` : ""}
+                    </div>
+                `;
+
+                // Bottom Row: Festival labels or Nakshatra/Special Tithi
+                let bottomContent = "";
+                if (visibleFestivals.length > 0) {
+                    bottomContent = visibleFestivals.slice(0, 2).map(f => {
+                        const badge = getReligionBadgeStyle(f.type, f.isGovt);
+                        return `
+                            <div class="text-[9.5px] sm:text-[10.5px] font-bold leading-tight px-1 py-0.5 rounded truncate ${badge.bg}" title="${f.title}">
+                                ${f.title}
+                            </div>
+                        `;
+                    }).join("");
+                } else if (p.tithiInfo.special) {
+                    bottomContent = `
+                        <div class="text-[9.5px] sm:text-[10px] font-semibold text-amber-900 truncate">
+                            • ${p.tithiInfo.special}
+                        </div>
+                    `;
+                } else {
+                    bottomContent = `
+                        <div class="text-[9.5px] sm:text-[10px] text-stone-500 font-medium truncate">
+                            ${p.nakshatra}
+                        </div>
+                    `;
+                }
+
+                cell.innerHTML = `${topRow}${middleRow}<div class="space-y-0.5">${bottomContent}</div>`;
+                cell.addEventListener("click", () => openDayModal(p));
+                calendarGrid.appendChild(cell);
+            }
+
+            // Render Bottom Monthly Festivals & Govt Holidays List
+            renderMonthlyFestivalsList(monthIdx, mData);
+
+            // Render Right Sidebar Jyotish Ganana
+            renderJyotishBox(mData);
+
+            // Render Right Sidebar Monthly Rashifal
+            renderRashifalBox(mData);
+        }
+
+        function renderMonthlyFestivalsList(monthIdx, mData) {
+            const listContainer = document.getElementById("monthlyFestivalsList");
+            const countBadge = document.getElementById("festivalCountBadge");
+
+            const filtered = mData.festivals.filter(f => {
+                if (activeFilter === "all") return true;
+                if (activeFilter === "govt") return f.isGovt;
+                return f.type === activeFilter;
+            });
+
+            countBadge.textContent = `${toDevanagariDigits(filtered.length)} पर्व / अवकाश`;
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<div class="col-span-2 text-center py-4 text-sm text-stone-500 font-semibold">इस श्रेणी में इस माह कोई विशेष पर्व नहीं है।</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = filtered.map(f => {
+                const dateObj = new Date(2027, monthIdx, f.day);
+                const dayName = WEEKDAYS_HI[dateObj.getDay()];
+                const badge = getReligionBadgeStyle(f.type, f.isGovt);
+
+                return `
+                    <div class="flex items-center justify-between gap-2 p-2 rounded-lg border ${
+                        f.isGovt ? "bg-red-50/90 border-red-300" : "bg-amber-50/70 border-amber-200"
+                    }">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-10 h-10 rounded-lg ${
+                                f.isGovt ? "bg-red-700 text-white" : "bg-amber-500 text-red-950"
+                            } flex flex-col items-center justify-center shrink-0 shadow-xs">
+                                <span class="font-eng font-extrabold text-sm leading-none">${f.day}</span>
+                                <span class="text-[9px] font-bold mt-0.5">${dayName.slice(0, 3)}</span>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-xs sm:text-sm font-bold text-stone-900 truncate">${f.title}</div>
+                                <div class="text-[10px] text-stone-600 font-semibold">${dayName} • ${HINDI_MONTHS_NAME[monthIdx]} 2027</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${badge.bg}">
+                            ${f.isGovt ? "🏛️ राजकीय अवकाश" : `${badge.icon} ${badge.label}`}
+                        </span>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function renderJyotishBox(mData) {
+            const box = document.getElementById("jyotishBox");
+            const j = mData.jyotish;
+
+            box.innerHTML = `
+                <div class="grid grid-cols-2 gap-2 bg-red-900/60 p-2 rounded-lg border border-amber-400/30 text-center">
+                    <div>
+                        <div class="text-[10px] text-amber-300 font-bold">🌅 सूर्योदय (औसत)</div>
+                        <div class="font-eng font-bold text-white text-xs sm:text-sm">${mData.sunrise}</div>
+                    </div>
+                    <div class="border-l border-amber-400/30">
+                        <div class="text-[10px] text-amber-300 font-bold">🌇 सूर्यास्त (औसत)</div>
+                        <div class="font-eng font-bold text-white text-xs sm:text-sm">${mData.sunset}</div>
+                    </div>
+                </div>
+
+                <div class="bg-red-950/70 p-2.5 rounded-lg border border-amber-500/30 space-y-1.5">
+                    <div>
+                        <span class="text-amber-300 font-bold">💍 शुभ विवाह मुहूर्त:</span>
+                        <span class="text-amber-50"> ${j.vivah}</span>
+                    </div>
+                    <div>
+                        <span class="text-amber-300 font-bold">🏠 गृह प्रवेश मुहूर्त:</span>
+                        <span class="text-amber-50"> ${j.grihaPravesh}</span>
+                    </div>
+                    <div>
+                        <span class="text-amber-300 font-bold">🚗 वाहन क्रय मुहूर्त:</span>
+                        <span class="text-amber-50"> ${j.vahan}</span>
+                    </div>
+                </div>
+
+                <div class="bg-amber-500/15 p-2.5 rounded-lg border border-amber-400/40 space-y-1">
+                    <div>
+                        <span class="text-amber-300 font-bold">⚠️ पंचक विचार:</span>
+                        <span class="text-amber-100"> ${j.panchak}</span>
+                    </div>
+                    <div>
+                        <span class="text-amber-300 font-bold">🌑 ग्रहण विवरण:</span>
+                        <span class="text-amber-100"> ${j.grahan}</span>
+                    </div>
+                    <div class="pt-1 border-t border-amber-400/20 text-amber-200 font-semibold">
+                        ✨ ${j.vishesh}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRashifalBox(mData) {
+            const container = document.getElementById("rashifalContainer");
+            container.innerHTML = mData.rashifal.map(item => `
+                <div class="bg-white border border-amber-300 hover:border-red-700 rounded-xl p-2.5 shadow-2xs transition">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-6 h-6 rounded-full bg-red-800 text-amber-200 flex items-center justify-center text-xs font-bold shadow-2xs">
+                                ${item.icon}
+                            </span>
+                            <h4 class="font-extrabold text-red-950 text-xs sm:text-sm">${item.rashi}</h4>
+                        </div>
+                        <span class="text-[10px] font-bold bg-amber-100 text-amber-950 px-2 py-0.5 rounded-full border border-amber-300">
+                            शुभ: ${item.lucky}
+                        </span>
+                    </div>
+                    <p class="text-xs text-stone-700 leading-relaxed">
+                        ${item.text}
+                    </p>
+                </div>
+            `).join("");
+        }
+
+        // Open Detailed Day Panchang Modal
+        function openDayModal(p) {
+            const modal = document.getElementById("dayModal");
+            document.getElementById("modalDateTitle").textContent = `${p.dayNum} ${HINDI_MONTHS_NAME[p.monthIdx]} 2027, ${p.weekdayName}`;
+            document.getElementById("modalSubDates").textContent = `विक्रम संवत ${p.vsYear} (${p.lunarMasa} मास) • हिजरी सन् ${p.hijriYearNum}`;
+
+            const festBanner = document.getElementById("modalFestivalBanner");
+            if (p.dayFestivals.length > 0) {
+                festBanner.classList.remove("hidden");
+                festBanner.innerHTML = p.dayFestivals.map(f => `
+                    <div class="font-extrabold text-red-900 text-sm sm:text-base">
+                        🎊 ${f.title} ${f.isGovt ? "(राजकीय अवकाश)" : ""}
+                    </div>
+                `).join("");
+            } else {
+                festBanner.classList.add("hidden");
+            }
+
+            const details = document.getElementById("modalPanchangDetails");
+            details.innerHTML = `
+                <div class="bg-white p-2.5 rounded-xl border border-amber-300">
+                    <div class="text-[11px] text-stone-500 font-bold">हिन्दू तिथि व पक्ष</div>
+                    <div class="font-extrabold text-red-950 mt-0.5">${p.lunarMasa} ${p.tithiInfo.paksha} ${p.tithiInfo.name}</div>
+                </div>
+                <div class="bg-white p-2.5 rounded-xl border border-emerald-300">
+                    <div class="text-[11px] text-stone-500 font-bold">इस्लामी हिजरी तारीख</div>
+                    <div class="font-extrabold text-emerald-900 mt-0.5">${toDevanagariDigits(p.hijriDay)} ${p.hijriMonth} ${p.hijriYearNum} हि.</div>
+                </div>
+                <div class="bg-white p-2.5 rounded-xl border border-amber-300">
+                    <div class="text-[11px] text-stone-500 font-bold">नक्षत्र (Nakshatra)</div>
+                    <div class="font-extrabold text-stone-900 mt-0.5">${p.nakshatra}</div>
+                </div>
+                <div class="bg-white p-2.5 rounded-xl border border-amber-300">
+                    <div class="text-[11px] text-stone-500 font-bold">योग (Yoga)</div>
+                    <div class="font-extrabold text-stone-900 mt-0.5">${p.yoga}</div>
+                </div>
+                <div class="bg-white p-2.5 rounded-xl border border-amber-300">
+                    <div class="text-[11px] text-stone-500 font-bold">सूर्योदय / सूर्यास्त</div>
+                    <div class="font-eng font-bold text-stone-900 mt-0.5">${p.sunrise} / ${p.sunset}</div>
+                </div>
+                <div class="bg-red-50 p-2.5 rounded-xl border border-red-300">
+                    <div class="text-[11px] text-red-700 font-bold">राहुकाल (अशुभ समय)</div>
+                    <div class="font-bold text-red-950 mt-0.5">${p.rahukaal}</div>
+                </div>
+            `;
+
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeDayModal() {
+            const modal = document.getElementById("dayModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        // Event Listeners
+        monthSelect.addEventListener("change", (e) => {
+            currentMonth = parseInt(e.target.value, 10);
+            renderCalendar(currentMonth);
+        });
+
+        prevMonthBtn.addEventListener("click", () => {
+            currentMonth = (currentMonth - 1 + 12) % 12;
+            renderCalendar(currentMonth);
+        });
+
+        nextMonthBtn.addEventListener("click", () => {
+            currentMonth = (currentMonth + 1) % 12;
+            renderCalendar(currentMonth);
+        });
+
+        // Filter Pills
+        document.querySelectorAll(".filter-pill").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".filter-pill").forEach(b => {
+                    b.classList.remove("bg-amber-500", "text-stone-950", "font-bold");
+                    b.classList.add("bg-stone-800", "font-semibold");
+                });
+                btn.classList.remove("bg-stone-800", "font-semibold");
+                btn.classList.add("bg-amber-500", "text-stone-950", "font-bold");
+
+                activeFilter = btn.getAttribute("data-filter");
+                renderCalendar(currentMonth);
+            });
+        });
+
+        // Modal Close Handlers
+        document.getElementById("closeModalBtn").addEventListener("click", closeDayModal);
+        document.getElementById("modalOkBtn").addEventListener("click", closeDayModal);
+        document.getElementById("dayModal").addEventListener("click", (e) => {
+            if (e.target.id === "dayModal") closeDayModal();
+        });
+
+        // Keyboard Left/Right Arrow Navigation
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeDayModal();
+            if (e.key === "ArrowLeft") {
+                currentMonth = (currentMonth - 1 + 12) % 12;
+                renderCalendar(currentMonth);
+            } else if (e.key === "ArrowRight") {
+                currentMonth = (currentMonth + 1) % 12;
+                renderCalendar(currentMonth);
+            }
+        });
+
+        // Initialize on Window Load
+        window.onload = function () {
+            renderCalendar(0);
+        };
+    </script>
+</body>
+</html>
+```
